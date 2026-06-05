@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Huddle">
+<meta name="theme-color" content="#2E7D32">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<title>K&D Daily Huddle</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+:root {
+  --green: #2E7D32; --green-light: #E8F5E9; --green-dark: #1B5E20; --green-mid: #4CAF50;
+  --amber: #E65100; --amber-light: #FFF3E0;
+  --blue: #1565C0; --blue-light: #E3F2FD;
+  --red: #C62828; --red-light: #FFEBEE;
+  --purple: #6A1B9A; --purple-light: #F3E5F5;
+  --teal: #00695C; --teal-light: #E0F2F1;
+  --gray: #37474F; --gray-light: #ECEFF1;
+  --bg: #F4F6F0; --card: #fff; --border: #CFD8DC;
+  --text: #1C2B1E; --muted: #546E7A;
+  --font: 'Barlow', sans-serif;
+  --font-cond: 'Barlow Condensed', sans-serif;
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+}
+
+html, body { height: 100%; overflow: hidden; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); }
+
+/* SCREENS */
+.screen { display: none; height: 100vh; flex-direction: column; overflow: hidden; }
+.screen.active { display: flex; }
+
+/* ── LOGIN ── */
+#login {
+  align-items: center; justify-content: center; padding: 1.5rem;
+  background: linear-gradient(160deg, #1B5E20 0%, #2E7D32 60%, #388E3C 100%);
+  padding-top: calc(1.5rem + var(--safe-top));
+}
+.login-card {
+  background: var(--card); border-radius: 20px; padding: 2rem 1.75rem;
+  width: 100%; max-width: 400px; box-shadow: 0 12px 40px rgba(0,0,0,0.22);
+}
+.logo { text-align: center; margin-bottom: 1.5rem; }
+.logo-badge {
+  display: inline-block; background: var(--green-light); border-radius: 14px;
+  padding: 10px 18px; margin-bottom: 10px;
+}
+.logo-badge span { font-size: 1.8rem; }
+.logo-main { font-family: var(--font-cond); font-size: 1.9rem; font-weight: 700; color: var(--green); letter-spacing: 1px; }
+.logo-sub { font-size: 0.78rem; color: var(--muted); letter-spacing: 2.5px; text-transform: uppercase; margin-top: 3px; }
+.lang-toggle { display: flex; gap: 8px; margin-bottom: 1.5rem; }
+.lang-btn {
+  flex: 1; padding: 8px; border-radius: 10px; border: 1.5px solid var(--border);
+  background: transparent; cursor: pointer; font-family: var(--font); font-size: 0.88rem;
+  font-weight: 600; color: var(--muted); transition: all 0.2s;
+}
+.lang-btn.active { background: var(--green); color: #fff; border-color: var(--green); }
+.field-group { margin-bottom: 1.1rem; }
+.field-group label {
+  display: block; font-size: 0.75rem; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 5px;
+}
+.field-group input, .field-group select {
+  width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px;
+  font-family: var(--font); font-size: 1rem; color: var(--text); background: #FAFAFA;
+  outline: none; transition: border 0.2s; appearance: none; -webkit-appearance: none;
+}
+.field-group input:focus, .field-group select:focus { border-color: var(--green); background: #fff; }
+.btn-primary {
+  width: 100%; padding: 14px; background: var(--green); color: #fff; border: none;
+  border-radius: 10px; font-family: var(--font-cond); font-size: 1.15rem; font-weight: 700;
+  letter-spacing: 1px; cursor: pointer; transition: background 0.2s; margin-top: 0.25rem;
+}
+.btn-primary:active { background: var(--green-dark); transform: scale(0.99); }
+.hub-link { text-align: center; margin-top: 1rem; font-size: 0.85rem; color: var(--muted); }
+.hub-link a { color: var(--green); text-decoration: none; font-weight: 600; cursor: pointer; }
+
+/* ── CHECK-IN ── */
+#checkin { background: var(--bg); }
+.checkin-header {
+  background: var(--green); color: #fff;
+  padding: calc(0.9rem + var(--safe-top)) 1.1rem 0.9rem;
+  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+}
+.checkin-header h2 { font-family: var(--font-cond); font-size: 1.25rem; font-weight: 700; }
+.checkin-header p { font-size: 0.78rem; opacity: 0.82; margin-top: 2px; }
+.lang-pill {
+  background: rgba(255,255,255,0.18); border-radius: 20px; padding: 6px 13px;
+  font-size: 0.8rem; font-weight: 600; cursor: pointer; border: 1px solid rgba(255,255,255,0.35);
+  color: #fff; white-space: nowrap; flex-shrink: 0; margin-left: 8px;
+}
+.progress-bar { height: 3px; background: rgba(255,255,255,0.25); flex-shrink: 0; }
+.progress-fill { height: 100%; background: #fff; transition: width 0.4s ease; }
+.checkin-body { flex: 1; overflow-y: auto; padding: 1rem; -webkit-overflow-scrolling: touch; }
+.question-card {
+  background: var(--card); border-radius: 14px; border: 1.5px solid var(--border);
+  padding: 1.1rem; margin-bottom: 0.85rem;
+}
+.q-num { font-size: 0.7rem; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 3px; }
+.q-text { font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 0.4rem; line-height: 1.35; }
+.q-sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.65rem; line-height: 1.4; }
+.q-textarea {
+  width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 9px;
+  font-family: var(--font); font-size: 0.95rem; color: var(--text); resize: none;
+  min-height: 76px; outline: none; transition: border 0.2s; background: #FAFAFA;
+}
+.q-textarea:focus { border-color: var(--green); background: #fff; }
+.mic-row { display: flex; align-items: center; gap: 8px; margin-top: 7px; }
+.mic-btn {
+  display: flex; align-items: center; gap: 5px; padding: 6px 13px;
+  border: 1.5px solid var(--border); border-radius: 20px; background: transparent;
+  cursor: pointer; font-family: var(--font); font-size: 0.8rem; color: var(--muted);
+  transition: all 0.2s;
+}
+.mic-btn:active, .mic-btn.recording { background: var(--red-light); border-color: var(--red); color: var(--red); }
+.mic-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); display: none; flex-shrink: 0; }
+.mic-btn.recording .mic-dot { display: block; animation: pulse 0.8s infinite; }
+.char-count { font-size: 0.72rem; color: var(--muted); margin-left: auto; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
+.urgency-row { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 8px; }
+.urgency-chip {
+  padding: 5px 13px; border-radius: 20px; border: 1.5px solid var(--border);
+  background: transparent; cursor: pointer; font-size: 0.78rem; font-weight: 600;
+  color: var(--muted); transition: all 0.18s;
+}
+.urgency-chip.selected { border-color: var(--green); background: var(--green-light); color: var(--green); }
+.urgency-chip.urgent.selected { border-color: var(--red); background: var(--red-light); color: var(--red); }
+.urgency-chip.warn.selected { border-color: var(--amber); background: var(--amber-light); color: var(--amber); }
+.checkin-footer {
+  padding: 0.9rem 1rem calc(0.9rem + var(--safe-bottom));
+  background: var(--card); border-top: 1px solid var(--border); flex-shrink: 0;
+}
+.submit-btn {
+  width: 100%; padding: 14px; background: var(--green); color: #fff; border: none;
+  border-radius: 10px; font-family: var(--font-cond); font-size: 1.15rem; font-weight: 700;
+  letter-spacing: 1px; cursor: pointer; transition: all 0.2s;
+}
+.submit-btn:disabled { background: #B0BEC5; cursor: not-allowed; }
+.submit-btn:not(:disabled):active { background: var(--green-dark); transform: scale(0.99); }
+.submit-count { text-align: center; font-size: 0.75rem; color: var(--muted); margin-top: 6px; }
+
+/* ── SUCCESS ── */
+#success {
+  align-items: center; justify-content: center; padding: 2rem;
+  background: linear-gradient(160deg, #1B5E20, #2E7D32);
+}
+.success-card {
+  background: var(--card); border-radius: 20px; padding: 2.5rem 2rem;
+  width: 100%; max-width: 360px; text-align: center;
+}
+.success-icon { font-size: 4rem; margin-bottom: 1rem; }
+.success-card h2 { font-family: var(--font-cond); font-size: 1.7rem; color: var(--green); margin-bottom: 0.5rem; }
+.success-card p { color: var(--muted); font-size: 0.95rem; line-height: 1.55; }
+.success-time { display: inline-block; background: var(--green-light); color: var(--green); font-weight: 600; font-size: 0.82rem; padding: 4px 12px; border-radius: 20px; margin-top: 0.75rem; }
+
+/* ── HUB AUTH ── */
+#hubauth {
+  align-items: center; justify-content: center; padding: 1.5rem;
+  background: var(--gray);
+}
+.hubauth-card {
+  background: var(--card); border-radius: 20px; padding: 2rem 1.75rem;
+  width: 100%; max-width: 360px;
+}
+.hubauth-card h2 { font-family: var(--font-cond); font-size: 1.6rem; font-weight: 700; margin-bottom: 0.4rem; }
+.hubauth-card p { color: var(--muted); font-size: 0.88rem; margin-bottom: 1.5rem; line-height: 1.45; }
+
+/* ── COMMAND HUB ── */
+#hub { background: #EAECEE; }
+.hub-header {
+  background: var(--gray); color: #fff; flex-shrink: 0;
+  padding: calc(0.8rem + var(--safe-top)) 1.1rem 0.8rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.hub-header-left h1 { font-family: var(--font-cond); font-size: 1.3rem; font-weight: 700; }
+.hub-header-left p { font-size: 0.75rem; opacity: 0.65; margin-top: 1px; }
+.hub-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.hub-date { font-size: 0.75rem; opacity: 0.75; background: rgba(255,255,255,0.1); padding: 3px 9px; border-radius: 20px; }
+.hub-count { font-size: 0.72rem; font-weight: 700; background: var(--green-mid); padding: 3px 9px; border-radius: 20px; color: #fff; }
+.hub-tabs {
+  display: flex; background: #fff; border-bottom: 1.5px solid var(--border);
+  overflow-x: auto; flex-shrink: 0; -webkit-overflow-scrolling: touch;
+}
+.hub-tabs::-webkit-scrollbar { display: none; }
+.hub-tab {
+  padding: 10px 15px; font-size: 0.8rem; font-weight: 600; color: var(--muted);
+  border-bottom: 2.5px solid transparent; cursor: pointer; white-space: nowrap; transition: all 0.18s;
+}
+.hub-tab.active { color: var(--green); border-bottom-color: var(--green); }
+.hub-body { flex: 1; overflow-y: auto; padding: 1rem; -webkit-overflow-scrolling: touch; }
+.refresh-btn {
+  display: flex; align-items: center; gap: 5px; padding: 6px 13px;
+  border: 1.5px solid rgba(255,255,255,0.3); border-radius: 20px; background: transparent;
+  cursor: pointer; font-family: var(--font); font-size: 0.78rem; color: rgba(255,255,255,0.85);
+}
+
+/* BUCKET GRID */
+.bucket-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.9rem; }
+.bucket { background: var(--card); border-radius: 13px; border: 1.5px solid var(--border); overflow: hidden; }
+.bucket-header { padding: 0.8rem 0.9rem; display: flex; align-items: center; gap: 8px; border-bottom: 1.5px solid var(--border); }
+.bucket-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.bucket-title { font-family: var(--font-cond); font-size: 0.95rem; font-weight: 700; letter-spacing: 0.3px; flex: 1; }
+.bucket-count { font-size: 0.72rem; font-weight: 700; background: var(--gray-light); color: var(--muted); padding: 2px 8px; border-radius: 10px; }
+.bucket-body { padding: 0.7rem; min-height: 70px; }
+
+/* TILES */
+.tile {
+  background: #fff; border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 0.75rem; margin-bottom: 0.55rem; cursor: grab; transition: box-shadow 0.15s, border-color 0.15s;
+}
+.tile:last-child { margin-bottom: 0; }
+.tile:hover { border-color: #90A4AE; box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
+.tile.sortable-ghost { opacity: 0.35; }
+.tile.sortable-chosen { box-shadow: 0 4px 16px rgba(0,0,0,0.14); }
+.tile-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 4px; }
+.tile-foreman { font-size: 0.7rem; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.8px; }
+.tile-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.tile-time { font-size: 0.68rem; color: var(--muted); }
+.tile-branch { font-size: 0.65rem; color: var(--muted); }
+.tile-text { font-size: 0.87rem; color: var(--text); line-height: 1.45; }
+.tile-orig {
+  font-size: 0.76rem; color: var(--muted); margin-top: 6px; font-style: italic;
+  border-top: 1px dashed var(--border); padding-top: 5px;
+}
+.tile-flag {
+  display: inline-block; padding: 2px 8px; border-radius: 8px;
+  font-size: 0.68rem; font-weight: 700; margin-top: 5px;
+}
+.flag-urgent { background: var(--red-light); color: var(--red); }
+.flag-warn { background: var(--amber-light); color: var(--amber); }
+.flag-ok { background: var(--green-light); color: var(--green); }
+.empty-tile { text-align: center; padding: 1.25rem 0.5rem; color: var(--muted); font-size: 0.82rem; opacity: 0.7; }
+
+/* FOREMAN VIEW */
+.foreman-card {
+  background: var(--card); border-radius: 12px; border: 1.5px solid var(--border);
+  padding: 0.9rem 1rem; margin-bottom: 0.75rem;
+}
+.foreman-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.foreman-card-name { font-weight: 700; font-size: 0.97rem; }
+.foreman-card-branch { font-size: 0.75rem; color: var(--muted); font-weight: 400; }
+.status-badge { font-size: 0.7rem; padding: 3px 10px; border-radius: 10px; font-weight: 700; }
+.badge-done { background: var(--green-light); color: var(--green); }
+.badge-partial { background: var(--amber-light); color: var(--amber); }
+.bucket-pills { display: flex; flex-wrap: wrap; gap: 5px; }
+.bucket-pill { font-size: 0.7rem; padding: 3px 9px; border-radius: 8px; font-weight: 600; }
+.foreman-expand { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px; display: none; }
+.foreman-expand.open { display: block; }
+.expand-field { margin-bottom: 7px; }
+.expand-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 2px; }
+.expand-val { font-size: 0.85rem; color: var(--text); line-height: 1.4; }
+.expand-orig { font-size: 0.78rem; color: var(--muted); font-style: italic; }
+.toggle-btn { font-size: 0.75rem; color: var(--blue); background: none; border: none; cursor: pointer; padding: 0; font-family: var(--font); font-weight: 600; }
+
+/* LOADING */
+.loading-overlay {
+  position: fixed; inset: 0; background: rgba(255,255,255,0.88);
+  display: none; align-items: center; justify-content: center; z-index: 200;
+  flex-direction: column; gap: 12px;
+}
+.spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--green); border-radius: 50%; animation: spin 0.7s linear infinite; }
+.loading-msg { font-size: 0.85rem; color: var(--muted); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.no-data { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+.no-data .no-icon { font-size: 2.8rem; margin-bottom: 0.75rem; }
+.no-data p { font-size: 0.9rem; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="login" class="screen active">
+  <div class="login-card">
+    <div class="logo">
+      <div class="logo-badge"><span>🌿</span></div>
+      <div class="logo-main">K&D LANDSCAPING</div>
+      <div class="logo-sub">Daily Huddle Check-In</div>
+    </div>
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('en',this)">🇺🇸 English</button>
+      <button class="lang-btn" onclick="setLang('es',this)">🇲🇽 Español</button>
+    </div>
+    <div class="field-group">
+      <label id="lbl-name">Your Name</label>
+      <input type="text" id="foreman-name" placeholder="e.g. Miguel Ramirez" autocomplete="name">
+    </div>
+    <div class="field-group">
+      <label id="lbl-branch">Branch / Sucursal</label>
+      <select id="foreman-branch">
+        <option value="">Select branch...</option>
+        <option value="Watsonville">Watsonville</option>
+        <option value="SLO">San Luis Obispo</option>
+        <option value="Santa Barbara">Santa Barbara</option>
+      </select>
+    </div>
+    <button class="btn-primary" onclick="startCheckin()">
+      <span id="login-btn-text">Start Check-In ➜</span>
+    </button>
+    <div class="hub-link">
+      <a onclick="showHubAuth()">Management Hub →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CHECK-IN ═══ -->
+<div id="checkin" class="screen">
+  <div class="checkin-header">
+    <div>
+      <h2 id="ci-greeting">Morning, Foreman</h2>
+      <p id="ci-date"></p>
+    </div>
+    <button class="lang-pill" onclick="toggleCheckinLang()" id="lang-pill-btn">🇲🇽 Español</button>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+  <div class="checkin-body" id="questions-body"></div>
+  <div class="checkin-footer">
+    <button class="submit-btn" id="submit-btn" onclick="submitCheckin()" disabled>
+      <span id="submit-label">Complete at least 3 fields</span>
+    </button>
+    <div class="submit-count" id="submit-count"></div>
+  </div>
+</div>
+
+<!-- ═══ SUCCESS ═══ -->
+<div id="success" class="screen">
+  <div class="success-card">
+    <div class="success-icon">✅</div>
+    <h2 id="success-title">Check-In Complete!</h2>
+    <p id="success-msg">Your responses have been sent to the management hub. Have a great shift!</p>
+    <div class="success-time" id="success-time"></div>
+    <button class="btn-primary" style="margin-top:1.5rem" onclick="goLogin()" id="success-btn">New Check-In</button>
+  </div>
+</div>
+
+<!-- ═══ HUB AUTH ═══ -->
+<div id="hubauth" class="screen">
+  <div class="hubauth-card">
+    <h2>🏗 Management Hub</h2>
+    <p>Access the daily command center to review foreman check-ins and manage your crew.</p>
+    <div class="field-group">
+      <label>Your Role</label>
+      <select id="hub-role">
+        <option value="Superintendent">Superintendent (Rafael)</option>
+        <option value="Project Coordinator">Project Coordinator (Malena)</option>
+        <option value="Project Manager">Project Manager</option>
+        <option value="Commercial Leader">Commercial Leader (Brian)</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label>PIN</label>
+      <input type="password" id="hub-pin" placeholder="Enter PIN" maxlength="6"
+             onkeydown="if(event.key==='Enter')authHub()">
+    </div>
+    <button class="btn-primary" onclick="authHub()">Access Hub ➜</button>
+    <div class="hub-link" style="margin-top:0.85rem"><a onclick="goLogin()">← Back to Check-In</a></div>
+  </div>
+</div>
+
+<!-- ═══ COMMAND HUB ═══ -->
+<div id="hub" class="screen">
+  <div class="hub-header">
+    <div class="hub-header-left">
+      <h1>Command Hub</h1>
+      <p id="hub-role-label">Loading...</p>
+    </div>
+    <div class="hub-meta">
+      <div class="hub-date" id="hub-date-label"></div>
+      <div class="hub-count" id="hub-sub-count">0 check-ins</div>
+    </div>
+  </div>
+  <div class="hub-tabs" id="hub-tabs">
+    <div class="hub-tab active" data-view="buckets" onclick="hubTab('buckets',this)">📋 All Buckets</div>
+    <div class="hub-tab" data-view="foremen" onclick="hubTab('foremen',this)">👷 By Foreman</div>
+    <div class="hub-tab" data-view="issues" onclick="hubTab('issues',this)">🚩 Issues</div>
+    <div class="hub-tab" data-view="materials" onclick="hubTab('materials',this)">🧰 Materials</div>
+    <div class="hub-tab" data-view="labor" onclick="hubTab('labor',this)">👥 Labor</div>
+    <div class="hub-tab" data-view="equipment" onclick="hubTab('equipment',this)">🚛 Equipment</div>
+  </div>
+  <div class="hub-body" id="hub-body"></div>
+</div>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading">
+  <div class="spinner"></div>
+  <div class="loading-msg" id="loading-msg">Loading...</div>
+</div>
+
+<script>
+// ── CONFIG ──
+const SUPABASE_URL = 'https://rlhfofdsdpsiavikuxhd.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaGZvZmRzZHBzaWF2aWt1eGhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI0MjMyMjEsImV4cCI6MjA1Nzk5OTIyMX0.Pp7Ws10D4gkBj3X6w96mXRCWJHeIj9E88_zOA3BHK3c';
+const HUB_PIN = '1234'; // ← CHANGE THIS before deploying
+const ANTHROPIC_KEY = ''; // ← ADD YOUR KEY (or proxy via Netlify function)
+
+// ── STATE ──
+let lang = 'en';
+let foremanName = '';
+let foremanBranch = '';
+let answers = {};
+let urgencyAnswers = {};
+let currentRecognition = null;
+let submissions = [];
+let currentView = 'buckets';
+
+// ── QUESTIONS ──
+const Q = {
+  en: [
+    { id:'today_work', label:'Q1 — Today\'s Work', text:'What are you doing today?', sub:'Describe the scope of work for your crew today.', urgencyKey:null },
+    { id:'materials',  label:'Q2 — Materials',     text:'Do you need any materials for the week?', sub:'List materials needed. Include quantities if known.', urgencyKey:'materials_urgency' },
+    { id:'labor',      label:'Q3 — Labor',          text:'Do you need more or fewer guys this week?', sub:'More crew, fewer crew, or just right?', urgencyKey:'labor_need' },
+    { id:'equipment',  label:'Q4 — Equipment',      text:'Do you need equipment, or are you done with what you have?', sub:'List needs or call out items ready to return.', urgencyKey:'equipment_status' },
+    { id:'issues',     label:'Q5 — Issues',          text:'Are there any issues needing to be discussed?', sub:'Safety, client, quality, or anything else on your mind.', urgencyKey:'issue_urgency' },
+    { id:'plan_finish',label:'Q6 — Plan & Finish',  text:'What are you working on today and when do you plan to finish?', sub:'e.g. "Irrigation on Zone 3 — done by 3pm"', urgencyKey:null }
+  ],
+  es: [
+    { id:'today_work', label:'P1 — Trabajo de Hoy', text:'¿Qué vas a hacer hoy?', sub:'Describe el trabajo de tu cuadrilla hoy.', urgencyKey:null },
+    { id:'materials',  label:'P2 — Materiales',     text:'¿Necesitas materiales para esta semana?', sub:'Lista los materiales. Incluye cantidades si las sabes.', urgencyKey:'materials_urgency' },
+    { id:'labor',      label:'P3 — Personal',        text:'¿Necesitas más o menos hombres esta semana?', sub:'¿Más cuadrilla, menos, o está bien así?', urgencyKey:'labor_need' },
+    { id:'equipment',  label:'P4 — Equipo',          text:'¿Necesitas equipo o ya terminaste con lo que tienes?', sub:'Lista lo que necesitas o lo que está listo para devolver.', urgencyKey:'equipment_status' },
+    { id:'issues',     label:'P5 — Problemas',       text:'¿Hay algún problema que necesita discutirse?', sub:'Seguridad, cliente, calidad o cualquier otra cosa.', urgencyKey:'issue_urgency' },
+    { id:'plan_finish',label:'P6 — Plan y Término', text:'¿Qué planeas trabajar hoy y cuándo planeas terminar?', sub:'Ej: "Riego en Zona 3 — termino a las 3pm"', urgencyKey:null }
+  ]
+};
+
+const URGENCY = {
+  en: {
+    materials_urgency: [{l:'Need ASAP',c:'urgent'},{l:'This Week',c:'warn'},{l:'Can Wait',c:'ok'}],
+    labor_need:        [{l:'Need More',c:'ok'},{l:'Right Sized',c:'ok'},{l:'Too Many',c:'warn'}],
+    equipment_status:  [{l:'Need Equipment',c:'warn'},{l:'Done / Return',c:'ok'},{l:'All Good',c:'ok'}],
+    issue_urgency:     [{l:'Critical',c:'urgent'},{l:'Should Discuss',c:'warn'},{l:'FYI Only',c:'ok'}]
+  },
+  es: {
+    materials_urgency: [{l:'Urgente',c:'urgent'},{l:'Esta Semana',c:'warn'},{l:'Puede Esperar',c:'ok'}],
+    labor_need:        [{l:'Necesito Más',c:'ok'},{l:'Está Bien',c:'ok'},{l:'Hay De Más',c:'warn'}],
+    equipment_status:  [{l:'Necesito Equipo',c:'warn'},{l:'Listo p/ Devolver',c:'ok'},{l:'Todo Bien',c:'ok'}],
+    issue_urgency:     [{l:'Crítico',c:'urgent'},{l:'Hay que Discutir',c:'warn'},{l:'Solo FYI',c:'ok'}]
+  }
+};
+
+const BUCKETS = [
+  { id:'today_work',  label:"Today's Work", color:'#2E7D32' },
+  { id:'materials',   label:'Materials',    color:'#1565C0' },
+  { id:'labor',       label:'Labor & Crew', color:'#6A1B9A' },
+  { id:'equipment',   label:'Equipment',    color:'#E65100' },
+  { id:'issues',      label:'Issues',       color:'#C62828' },
+  { id:'plan_finish', label:'Plan & Finish',color:'#00695C' }
+];
+
+// ── LANG ──
+function setLang(l, btn) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const isES = l === 'es';
+  document.getElementById('lbl-name').textContent   = isES ? 'Tu Nombre' : 'Your Name';
+  document.getElementById('lbl-branch').textContent = isES ? 'Sucursal'  : 'Branch';
+  document.getElementById('login-btn-text').textContent = isES ? 'Iniciar Registro ➜' : 'Start Check-In ➜';
+}
+
+function toggleCheckinLang() {
+  lang = lang === 'en' ? 'es' : 'en';
+  document.getElementById('lang-pill-btn').textContent = lang === 'en' ? '🇲🇽 Español' : '🇺🇸 English';
+  renderQuestions();
+}
+
+// ── LOGIN ──
+function startCheckin() {
+  foremanName   = document.getElementById('foreman-name').value.trim();
+  foremanBranch = document.getElementById('foreman-branch').value;
+  if (!foremanName)   { alert(lang==='en'?'Please enter your name.':'Por favor ingresa tu nombre.'); return; }
+  if (!foremanBranch) { alert(lang==='en'?'Please select your branch.':'Por favor selecciona tu sucursal.'); return; }
+  const now = new Date();
+  document.getElementById('ci-greeting').textContent = (lang==='en'?'Morning, ':'Buenos Días, ') + foremanName.split(' ')[0];
+  document.getElementById('ci-date').textContent = now.toLocaleDateString(lang==='en'?'en-US':'es-MX', { weekday:'long', month:'long', day:'numeric' });
+  document.getElementById('lang-pill-btn').textContent = lang==='en'?'🇲🇽 Español':'🇺🇸 English';
+  answers = {}; urgencyAnswers = {};
+  showScreen('checkin');
+  renderQuestions();
+}
+
+// ── QUESTIONS ──
+function renderQuestions() {
+  const qs = Q[lang];
+  const urgMap = URGENCY[lang];
+  let html = '';
+  qs.forEach(q => {
+    const val = answers[q.id] || '';
+    const selU = urgencyAnswers[q.id] || '';
+    const chips = q.urgencyKey ? (urgMap[q.urgencyKey] || []) : [];
+    const chipsHtml = chips.map(u =>
+      `<button class="urgency-chip${selU===u.l?(' selected '+u.c):''}" onclick="setUrgency('${q.id}','${u.l}',this,'${u.c}')">${u.l}</button>`
+    ).join('');
+    html += `<div class="question-card">
+      <div class="q-num">${q.label}</div>
+      <div class="q-text">${q.text}</div>
+      <div class="q-sub">${q.sub}</div>
+      <textarea class="q-textarea" id="ans-${q.id}" oninput="saveAnswer('${q.id}',this)"
+        placeholder="${lang==='en'?'Type or tap the mic to speak...':'Escribe o toca el mic para hablar...'}">${val}</textarea>
+      <div class="mic-row">
+        <button class="mic-btn" id="mic-${q.id}" onclick="toggleVoice('${q.id}')">
+          <span class="mic-dot"></span>
+          🎙 ${lang==='en'?'Speak':'Hablar'}
+        </button>
+        <span class="char-count" id="cc-${q.id}">${val.length > 0 ? val.length + ' chars' : ''}</span>
+      </div>
+      ${chips.length ? `<div class="urgency-row">${chipsHtml}</div>` : ''}
+    </div>`;
+  });
+  document.getElementById('questions-body').innerHTML = html;
+  updateProgress();
+}
+
+function saveAnswer(id, el) {
+  answers[id] = el.value;
+  const cc = document.getElementById('cc-' + id);
+  if (cc) cc.textContent = el.value.length > 0 ? el.value.length + ' chars' : '';
+  updateProgress();
+}
+
+function setUrgency(qid, val, el, cls) {
+  urgencyAnswers[qid] = val;
+  el.closest('.urgency-row').querySelectorAll('.urgency-chip').forEach(c => {
+    c.className = 'urgency-chip';
+  });
+  el.classList.add('selected', cls);
+}
+
+function updateProgress() {
+  const total = 6;
+  const filled = Object.values(answers).filter(v => v && v.trim().length > 0).length;
+  document.getElementById('progress').style.width = (filled / total * 100) + '%';
+  const btn = document.getElementById('submit-btn');
+  const lbl = document.getElementById('submit-label');
+  const cnt = document.getElementById('submit-count');
+  btn.disabled = filled < 3;
+  lbl.textContent = filled < 3
+    ? (lang==='en' ? `Complete ${3-filled} more field${3-filled!==1?'s':''}` : `Completa ${3-filled} campo${3-filled!==1?'s':''} más`)
+    : (lang==='en' ? 'Submit Check-In ✓' : 'Enviar Registro ✓');
+  cnt.textContent = `${filled} of 6 fields completed`;
+}
+
+// ── VOICE ──
+function toggleVoice(qid) {
+  const hasSR = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
+  if (!hasSR) { alert(lang==='en'?'Voice not supported in this browser. Please type your answer.':'La voz no es compatible en este navegador. Por favor escribe tu respuesta.'); return; }
+  const btn = document.getElementById('mic-' + qid);
+  if (currentRecognition) {
+    currentRecognition.stop(); currentRecognition = null;
+    document.querySelectorAll('.mic-btn').forEach(b => b.classList.remove('recording'));
+    return;
+  }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const r = new SR();
+  r.lang = lang === 'es' ? 'es-MX' : 'en-US';
+  r.continuous = false; r.interimResults = false;
+  r.onresult = e => {
+    const txt = e.results[0][0].transcript;
+    const ta = document.getElementById('ans-' + qid);
+    ta.value = (ta.value ? ta.value + ' ' : '') + txt;
+    answers[qid] = ta.value;
+    const cc = document.getElementById('cc-' + qid);
+    if (cc) cc.textContent = ta.value.length + ' chars';
+    updateProgress();
+  };
+  r.onend = () => { if (btn) btn.classList.remove('recording'); currentRecognition = null; };
+  r.onerror = () => { if (btn) btn.classList.remove('recording'); currentRecognition = null; };
+  currentRecognition = r;
+  r.start();
+  btn.classList.add('recording');
+}
+
+// ── TRANSLATION ──
+async function translateText(text) {
+  if (!text || text.trim().length < 3) return text;
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 300,
+        messages: [{ role: 'user', content: `Translate this Spanish landscaping field note to clear English. Return ONLY the translation:\n\n${text}` }]
+      })
+    });
+    const d = await resp.json();
+    return d.content?.[0]?.text?.trim() || text;
+  } catch { return text; }
+}
+
+// ── SUBMIT ──
+async function submitCheckin() {
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  setLoading(true, lang==='en'?'Saving your check-in...':'Guardando tu registro...');
+  const ts = new Date().toISOString();
+  const row = {
+    foreman_name: foremanName, branch: foremanBranch,
+    submitted_at: ts, input_lang: lang,
+    today_work_orig: answers['today_work']  || '',
+    materials_orig:  answers['materials']   || '',
+    labor_orig:      answers['labor']       || '',
+    equipment_orig:  answers['equipment']   || '',
+    issues_orig:     answers['issues']      || '',
+    plan_finish_orig:answers['plan_finish'] || '',
+    materials_urgency: urgencyAnswers['materials']  || '',
+    labor_need:        urgencyAnswers['labor']       || '',
+    equipment_status:  urgencyAnswers['equipment']   || '',
+    issue_urgency:     urgencyAnswers['issues']      || ''
+  };
+
+  if (lang === 'es' && ANTHROPIC_KEY) {
+    setLoading(true, 'Translating to English...');
+    const fields = ['today_work','materials','labor','equipment','issues','plan_finish'];
+    for (const f of fields) {
+      row[f + '_en'] = await translateText(row[f + '_orig']);
+    }
+  } else {
+    ['today_work','materials','labor','equipment','issues','plan_finish']
+      .forEach(f => { row[f + '_en'] = row[f + '_orig']; });
+  }
+
+  setLoading(true, 'Sending to hub...');
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/huddle_checkins`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(row)
+    });
+  } catch(e) { console.error('Supabase error:', e); }
+
+  setLoading(false);
+  const now = new Date();
+  document.getElementById('success-title').textContent = lang==='en'?'Check-In Complete! 🌿':'¡Registro Completo! 🌿';
+  document.getElementById('success-msg').textContent   = lang==='en'?'Your responses have been sent to the management hub. Have a great shift!':'Tus respuestas fueron enviadas al equipo de management. ¡Que tengas un buen turno!';
+  document.getElementById('success-time').textContent  = now.toLocaleTimeString(lang==='en'?'en-US':'es-MX',{hour:'numeric',minute:'2-digit'});
+  document.getElementById('success-btn').textContent   = lang==='en'?'New Check-In':'Nuevo Registro';
+  showScreen('success');
+}
+
+// ── HUB AUTH ──
+function showHubAuth() { showScreen('hubauth'); }
+
+function authHub() {
+  const pin  = document.getElementById('hub-pin').value;
+  const role = document.getElementById('hub-role').value;
+  if (pin !== HUB_PIN) { alert('Incorrect PIN. Contact your supervisor.'); return; }
+  document.getElementById('hub-role-label').textContent = role;
+  document.getElementById('hub-date-label').textContent = new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  showScreen('hub');
+  loadHub();
+}
+
+// ── HUB DATA ──
+async function loadHub() {
+  setLoading(true, 'Loading today\'s check-ins...');
+  const today = new Date().toISOString().split('T')[0];
+  try {
+    const resp = await fetch(
+      `${SUPABASE_URL}/rest/v1/huddle_checkins?submitted_at=gte.${today}T00:00:00&order=submitted_at.desc`,
+      { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
+    );
+    submissions = await resp.json();
+    if (!Array.isArray(submissions)) submissions = [];
+  } catch(e) { submissions = []; }
+  document.getElementById('hub-sub-count').textContent = submissions.length + ' check-in' + (submissions.length!==1?'s':'');
+  setLoading(false);
+  renderHub(currentView);
+}
+
+function hubTab(view, el) {
+  currentView = view;
+  document.querySelectorAll('.hub-tab').forEach(t => t.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderHub(view);
+}
+
+function renderHub(view) {
+  const body = document.getElementById('hub-body');
+  if (!submissions.length) {
+    body.innerHTML = `<div class="no-data"><div class="no-icon">📋</div><p>No check-ins submitted today yet.<br>Check back after morning huddle.</p></div>`;
+    return;
+  }
+  if (view === 'buckets') renderBuckets(body);
+  else if (view === 'foremen') renderByForeman(body);
+  else renderFiltered(body, view);
+}
+
+// ── BUCKET VIEW ──
+function renderBuckets(body) {
+  let html = '<div class="bucket-grid">';
+  BUCKETS.forEach(bc => {
+    const tiles = submissions.map(s => makeTile(s, bc.id)).filter(Boolean).join('');
+    const count = submissions.filter(s => (s[bc.id+'_en']||s[bc.id+'_orig']||'').trim()).length;
+    html += `<div class="bucket">
+      <div class="bucket-header">
+        <div class="bucket-dot" style="background:${bc.color}"></div>
+        <div class="bucket-title">${bc.label}</div>
+        <div class="bucket-count">${count}</div>
+      </div>
+      <div class="bucket-body sortable-bucket" id="bkt-${bc.id}">
+        ${tiles || '<div class="empty-tile">No entries</div>'}
+      </div>
+    </div>`;
+  });
+  html += '</div>';
+  body.innerHTML = html;
+  document.querySelectorAll('.sortable-bucket').forEach(el => {
+    Sortable.create(el, { group:'tiles', animation:150, ghostClass:'sortable-ghost', chosenClass:'sortable-chosen' });
+  });
+}
+
+function makeTile(s, field) {
+  const en   = (s[field+'_en']   || s[field+'_orig'] || '').trim();
+  const orig = (s[field+'_orig'] || '').trim();
+  if (!en) return null;
+  const time = new Date(s.submitted_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  let flag = '';
+  if (field==='issues' && s.issue_urgency) {
+    const cls = s.issue_urgency==='Critical'||s.issue_urgency==='Crítico' ? 'flag-urgent' : s.issue_urgency.includes('Discuss')||s.issue_urgency.includes('Discutir') ? 'flag-warn' : 'flag-ok';
+    flag = `<div><span class="tile-flag ${cls}">${s.issue_urgency}</span></div>`;
+  }
+  if (field==='materials' && s.materials_urgency) {
+    const cls = s.materials_urgency==='Need ASAP'||s.materials_urgency==='Urgente' ? 'flag-urgent' : s.materials_urgency.includes('Week')||s.materials_urgency.includes('Semana') ? 'flag-warn' : 'flag-ok';
+    flag = `<div><span class="tile-flag ${cls}">${s.materials_urgency}</span></div>`;
+  }
+  const showOrig = s.input_lang==='es' && orig && orig !== en;
+  return `<div class="tile">
+    <div class="tile-top">
+      <div class="tile-foreman">${s.foreman_name}</div>
+      <div class="tile-meta"><span class="tile-time">${time}</span><span class="tile-branch">${s.branch}</span></div>
+    </div>
+    <div class="tile-text">${en}</div>
+    ${flag}
+    ${showOrig ? `<div class="tile-orig">🇲🇽 ${orig}</div>` : ''}
+  </div>`;
+}
+
+// ── BY FOREMAN VIEW ──
+function renderByForeman(body) {
+  const fields = ['today_work','materials','labor','equipment','issues','plan_finish'];
+  const labels = ["Today's Work","Materials","Labor","Equipment","Issues","Plan & Finish"];
+  const colors = ['#2E7D32','#1565C0','#6A1B9A','#E65100','#C62828','#00695C'];
+  let html = '';
+  submissions.forEach((s,i) => {
+    const filled = fields.filter(f => (s[f+'_en']||s[f+'_orig']||'').trim());
+    const complete = filled.length >= 5;
+    const expandId = `exp-${i}`;
+    const pillsHtml = fields.map((f,j) => {
+      const txt = (s[f+'_en']||s[f+'_orig']||'').trim();
+      if (!txt) return '';
+      return `<span class="bucket-pill" style="background:${colors[j]}18;color:${colors[j]}">${labels[j]}</span>`;
+    }).join('');
+    const fieldsHtml = fields.map((f,j) => {
+      const en   = (s[f+'_en']  ||'').trim();
+      const orig = (s[f+'_orig']||'').trim();
+      if (!en && !orig) return '';
+      return `<div class="expand-field">
+        <div class="expand-label" style="color:${colors[j]}">${labels[j]}</div>
+        <div class="expand-val">${en || orig}</div>
+        ${s.input_lang==='es' && orig && orig!==en ? `<div class="expand-orig">🇲🇽 ${orig}</div>` : ''}
+      </div>`;
+    }).join('');
+    const time = new Date(s.submitted_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    html += `<div class="foreman-card">
+      <div class="foreman-card-header">
+        <div>
+          <span class="foreman-card-name">${s.foreman_name}</span>
+          <span class="foreman-card-branch"> · ${s.branch} · ${time}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="status-badge ${complete?'badge-done':'badge-partial'}">${complete?'Complete':'Partial'}</span>
+          <button class="toggle-btn" onclick="toggleExpand('${expandId}',this)">Details ▾</button>
+        </div>
+      </div>
+      <div class="bucket-pills">${pillsHtml}</div>
+      <div class="foreman-expand" id="${expandId}">${fieldsHtml}</div>
+    </div>`;
+  });
+  body.innerHTML = html || '<div class="no-data"><p>No foreman data today.</p></div>';
+}
+
+function toggleExpand(id, btn) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+  btn.textContent = el.classList.contains('open') ? 'Hide ▴' : 'Details ▾';
+}
+
+// ── FILTERED VIEW ──
+function renderFiltered(body, field) {
+  const bc = BUCKETS.find(b => b.id === field);
+  const tiles = submissions.map(s => makeTile(s, field)).filter(Boolean);
+  if (!tiles.length) {
+    body.innerHTML = `<div class="no-data"><div class="no-icon">✅</div><p>No ${bc.label} entries today.</p></div>`;
+    return;
+  }
+  body.innerHTML = `<div class="bucket" style="max-width:560px">
+    <div class="bucket-header">
+      <div class="bucket-dot" style="background:${bc.color}"></div>
+      <div class="bucket-title">${bc.label}</div>
+      <div class="bucket-count">${tiles.length}</div>
+    </div>
+    <div class="bucket-body sortable-bucket" id="bkt-flt">${tiles.join('')}</div>
+  </div>`;
+  Sortable.create(document.getElementById('bkt-flt'), { animation:150, ghostClass:'sortable-ghost', chosenClass:'sortable-chosen' });
+}
+
+// ── UTILS ──
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function setLoading(show, msg) {
+  const el = document.getElementById('loading');
+  el.style.display = show ? 'flex' : 'none';
+  if (msg) document.getElementById('loading-msg').textContent = msg;
+}
+
+function goLogin() {
+  answers = {}; urgencyAnswers = {};
+  showScreen('login');
+}
+
+// ── PWA SERVICE WORKER ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(e => console.log('SW:', e));
+}
+</script>
+</body>
+</html>
