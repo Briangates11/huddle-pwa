@@ -273,6 +273,63 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); }
 .no-data { text-align: center; padding: 3rem 1rem; color: var(--muted); }
 .no-data .no-icon { font-size: 2.8rem; margin-bottom: 0.75rem; }
 .no-data p { font-size: 0.9rem; line-height: 1.5; }
+
+/* Back button */
+.back-btn {
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+  color: #fff; border-radius: 20px; padding: 5px 12px; font-size: 0.78rem;
+  font-weight: 600; cursor: pointer; font-family: var(--font); margin-top: 4px;
+  -webkit-tap-highlight-color: transparent;
+}
+.back-btn:active { background: rgba(255,255,255,0.3); }
+
+/* Tile delete button */
+.tile-delete {
+  background: none; border: none; color: var(--muted); cursor: pointer;
+  font-size: 0.75rem; padding: 2px 4px; border-radius: 4px; line-height: 1;
+  opacity: 0.5; transition: opacity 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent; min-width: 24px; min-height: 24px;
+  display: flex; align-items: center; justify-content: center;
+}
+.tile-delete:hover, .tile-delete:active { opacity: 1; color: var(--red); background: var(--red-light); }
+
+/* Mobile responsive fixes */
+@media (max-width: 480px) {
+  .bucket-grid { grid-template-columns: 1fr; }
+  .login-card { padding: 1.75rem 1.25rem; }
+  .logo-main { font-size: 1.7rem; }
+  .hub-header { padding: calc(0.7rem + var(--safe-top)) 0.9rem 0.7rem; }
+  .hub-tab { padding: 9px 11px; font-size: 0.75rem; }
+  .checkin-header { padding: calc(0.75rem + var(--safe-top)) 0.9rem 0.75rem; }
+  .question-card { padding: 0.9rem; }
+  .q-text { font-size: 0.95rem; }
+  .tile { padding: 0.65rem; }
+  .tile-text { font-size: 0.82rem; }
+  .submit-btn { font-size: 1rem; padding: 13px; }
+}
+
+/* iPad fixes */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .bucket-grid { grid-template-columns: repeat(2, 1fr); }
+  .login-card { max-width: 480px; }
+  .checkin-body { max-width: 600px; margin: 0 auto; }
+  .checkin-footer { max-width: 600px; margin: 0 auto; }
+}
+
+/* Touch-friendly tap targets */
+.urgency-chip { min-height: 36px; display: inline-flex; align-items: center; }
+.lang-btn { min-height: 40px; }
+.mic-btn { min-height: 36px; }
+.hub-tab { min-height: 44px; display: flex; align-items: center; }
+.btn-primary { min-height: 48px; }
+.submit-btn { min-height: 48px; }
+
+/* Prevent iOS zoom on input focus */
+input, select, textarea { font-size: 16px !important; }
+
+/* Safe area for iPhone notch bottom */
+.checkin-footer { padding-bottom: calc(0.9rem + env(safe-area-inset-bottom)); }
+.hub-body { padding-bottom: calc(1rem + env(safe-area-inset-bottom)); }
 </style>
 </head>
 <body>
@@ -375,6 +432,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); }
     <div class="hub-meta">
       <div class="hub-date" id="hub-date-label"></div>
       <div class="hub-count" id="hub-sub-count">0 check-ins</div>
+      <button class="back-btn" onclick="goLogin()">← Back</button>
     </div>
   </div>
   <div class="hub-tabs" id="hub-tabs">
@@ -737,10 +795,15 @@ function makeTile(s, field) {
     flag = `<div><span class="tile-flag ${cls}">${s.materials_urgency}</span></div>`;
   }
   const showOrig = s.input_lang==='es' && orig && orig !== en;
-  return `<div class="tile">
+  const tileId = `tile-${s.id}-${field}`;
+  return `<div class="tile" id="${tileId}">
     <div class="tile-top">
       <div class="tile-foreman">${s.foreman_name}</div>
-      <div class="tile-meta"><span class="tile-time">${time}</span><span class="tile-branch">${s.branch}</span></div>
+      <div class="tile-meta">
+        <span class="tile-time">${time}</span>
+        <span class="tile-branch">${s.branch}</span>
+        <button class="tile-delete" onclick="deleteTile('${tileId}')" title="Remove tile">✕</button>
+      </div>
     </div>
     <div class="tile-text">${en}</div>
     ${flag}
@@ -818,6 +881,19 @@ function renderFiltered(body, field) {
 }
 
 // ── UTILS ──
+function deleteTile(tileId) {
+  const el = document.getElementById(tileId);
+  if (el) {
+    el.style.transition = 'opacity 0.2s, max-height 0.3s';
+    el.style.opacity = '0';
+    el.style.maxHeight = '0';
+    el.style.overflow = 'hidden';
+    el.style.marginBottom = '0';
+    el.style.padding = '0';
+    setTimeout(() => el.remove(), 300);
+  }
+}
+
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
