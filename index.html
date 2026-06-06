@@ -667,29 +667,14 @@ function authHub() {
 // ── HUB DATA ──
 async function loadHub() {
   setLoading(true, 'Loading today\'s check-ins...');
-  const body = document.getElementById('hub-body');
   try {
     const resp = await fetch(
       `${SUPABASE_URL}/rest/v1/huddle_checkins?order=submitted_at.desc&limit=200`,
       { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
     );
-    const raw = await resp.text();
-    if (!resp.ok) {
-      body.innerHTML = `<div class="no-data"><p>❌ Supabase error ${resp.status}: ${raw}</p></div>`;
-      setLoading(false);
-      return;
-    }
-    submissions = JSON.parse(raw);
-    if (!Array.isArray(submissions)) {
-      body.innerHTML = `<div class="no-data"><p>❌ Unexpected response: ${raw.substring(0,200)}</p></div>`;
-      setLoading(false);
-      return;
-    }
-  } catch(e) {
-    body.innerHTML = `<div class="no-data"><p>❌ Fetch failed: ${e.message}</p></div>`;
-    setLoading(false);
-    return;
-  }
+    submissions = await resp.json();
+    if (!Array.isArray(submissions)) submissions = [];
+  } catch(e) { submissions = []; }
   document.getElementById('hub-sub-count').textContent = submissions.length + ' check-in' + (submissions.length!==1?'s':'');
   setLoading(false);
   renderHub(currentView);
