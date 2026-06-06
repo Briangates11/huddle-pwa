@@ -396,10 +396,10 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); }
 
 <script>
 // ── CONFIG ──
-const SUPABASE_URL = '';
-const SUPABASE_KEY = '';
-const HUB_PIN = '1986'; // ← CHANGE THIS before deploying
-const ANTHROPIC_KEY = ''; // ← ADD YOUR KEY (or proxy via Netlify function)
+const SUPABASE_URL = 'https://rlhfofdsdpsiavikuxhd.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaGZvZmRzZHBzaWF2aWt1eGhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI0MjMyMjEsImV4cCI6MjA1Nzk5OTIyMX0.Pp7Ws10D4gkBj3X6w96mXRCWJHeIj9E88_zOA3BHK3c';
+const HUB_PIN = '1986';
+const ANTHROPIC_KEY = '';
 
 // ── STATE ──
 let lang = 'en';
@@ -669,6 +669,7 @@ async function loadHub() {
   setLoading(true, 'Loading today\'s check-ins...');
   const today = new Date().toISOString().split('T')[0];
   try {
+    const today = new Date().toISOString().split('T')[0];
     const resp = await fetch(
       `${SUPABASE_URL}/rest/v1/huddle_checkins?submitted_at=gte.${today}T00:00:00&order=submitted_at.desc`,
       { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } }
@@ -842,4 +843,3 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
-
