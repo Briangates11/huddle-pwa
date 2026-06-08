@@ -733,64 +733,58 @@ function toggleVoice(qid) {
   }
 }
 
-// ── TRANSLATION ──
-async function translateText(text) {
-  if (!text || text.trim().length < 3) return text;
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 300,
-        messages: [{ role: 'user', content: `Translate this Spanish landscaping field note to clear English. Return ONLY the translation:\n\n${text}` }]
-      })
-    });
-    const d = await resp.json();
-    return d.content?.[0]?.text?.trim() || text;
-  } catch { return text; }
-}
 
 // ── SUBMIT ──
 async function submitCheckin() {
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
-  setLoading(true, lang==='en'?'Saving your check-in...':'Guardando tu registro...');
-  const ts = new Date().toISOString();
+  setLoading(true, lang==='en' ? 'Sending check-in...' : 'Enviando registro...');
+
+  // Build row with only _orig fields — edge function handles all translation
   const row = {
     foreman_name: foremanName, branch: foremanBranch,
-    submitted_at: ts, input_lang: lang,
-    today_work_orig: answers['today_work']  || '',
-    materials_orig:  answers['materials']   || '',
-    labor_orig:      answers['labor']       || '',
-    equipment_orig:  answers['equipment']   || '',
-    issues_orig:     answers['issues']      || '',
-    plan_finish_orig:answers['plan_finish'] || '',
+    submitted_at: new Date().toISOString(), input_lang: lang,
+    today_work_orig:   answers['today_work']  || '',
+    materials_orig:    answers['materials']   || '',
+    labor_orig:        answers['labor']       || '',
+    equipment_orig:    answers['equipment']   || '',
+    issues_orig:       answers['issues']      || '',
+    plan_finish_orig:  answers['plan_finish'] || '',
     materials_urgency: urgencyAnswers['materials']  || '',
     labor_need:        urgencyAnswers['labor']       || '',
     equipment_status:  urgencyAnswers['equipment']   || '',
     issue_urgency:     urgencyAnswers['issues']      || ''
   };
 
-  if (lang === 'es' && ANTHROPIC_KEY) {
-    setLoading(true, 'Translating to English...');
-    const fields = ['today_work','materials','labor','equipment','issues','plan_finish'];
-    for (const f of fields) {
-      row[f + '_en'] = await translateText(row[f + '_orig']);
-    }
-  } else {
-    ['today_work','materials','labor','equipment','issues','plan_finish']
-      .forEach(f => { row[f + '_en'] = row[f + '_orig']; });
-  }
-
-  setLoading(true, lang==='en' ? 'Translating & saving...' : 'Traduciendo y guardando...');
   try {
+    // 15 second timeout so loading never hangs forever
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
     await fetch(`${PROXY_URL}?action=insert`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(row)
+      body: JSON.stringify(row),
+      signal: controller.signal
     });
-  } catch(e) { console.error('Submit error:', e); }
+    clearTimeout(timeout);
+  } catch(e) {
+    // Even if edge function fails, fall back to direct Supabase insert
+    // so the foreman's check-in is never lost
+    console.warn('Edge function failed, falling back to direct insert:', e.message);
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/huddle_checkins`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(row)
+      });
+    } catch(e2) { console.error('Fallback insert failed:', e2); }
+  }
+
   setLoading(false);
   const now = new Date();
   document.getElementById('success-title').textContent = lang==='en'?'Check-In Complete! 🌿':'¡Registro Completo! 🌿';
