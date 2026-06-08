@@ -274,6 +274,17 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); }
 .no-data .no-icon { font-size: 2.8rem; margin-bottom: 0.75rem; }
 .no-data p { font-size: 0.9rem; line-height: 1.5; }
 
+/* Hub language toggle */
+.hub-lang-toggle { display: flex; gap: 4px; margin-top: 4px; }
+.hub-lang-btn {
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.7); border-radius: 12px; padding: 3px 9px;
+  font-size: 0.72rem; font-weight: 700; cursor: pointer; font-family: var(--font);
+  transition: all 0.18s; -webkit-tap-highlight-color: transparent;
+}
+.hub-lang-btn.active { background: rgba(255,255,255,0.3); color: #fff; border-color: rgba(255,255,255,0.6); }
+.hub-lang-btn:active { background: rgba(255,255,255,0.4); }
+
 /* Back button */
 .back-btn {
   background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
@@ -432,6 +443,10 @@ input, select, textarea { font-size: 16px !important; }
     <div class="hub-meta">
       <div class="hub-date" id="hub-date-label"></div>
       <div class="hub-count" id="hub-sub-count">0 check-ins</div>
+      <div class="hub-lang-toggle">
+        <button class="hub-lang-btn active" id="hlb-en" onclick="setHubLang('en')">🇺🇸 EN</button>
+        <button class="hub-lang-btn" id="hlb-es" onclick="setHubLang('es')">🇲🇽 ES</button>
+      </div>
       <button class="back-btn" onclick="goLogin()">← Back</button>
     </div>
   </div>
@@ -456,8 +471,8 @@ input, select, textarea { font-size: 16px !important; }
 // ── CONFIG ──
 const SUPABASE_URL = 'https://rlhfofdsdpsiavikuxhd.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaGZvZmRzZHBzaWF2aWt1eGhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NzgxOTcsImV4cCI6MjA5NTA1NDE5N30.yq77u8dHlTEqhbt3RI2QkRtGHoSlfP1DB1V0vfsMXIE';
+const PROXY_URL = 'https://rlhfofdsdpsiavikuxhd.supabase.co/functions/v1/huddle-proxy';
 const HUB_PIN = '1986';
-const ANTHROPIC_KEY = '';
 
 // ── STATE ──
 let lang = 'en';
@@ -468,6 +483,7 @@ let urgencyAnswers = {};
 let currentRecognition = null;
 let submissions = [];
 let currentView = 'buckets';
+let hubLang = 'en'; // 'en' or 'es' — controls which column hub displays
 
 // ── QUESTIONS ──
 const Q = {
@@ -767,20 +783,14 @@ async function submitCheckin() {
       .forEach(f => { row[f + '_en'] = row[f + '_orig']; });
   }
 
-  setLoading(true, 'Sending to hub...');
+  setLoading(true, lang==='en' ? 'Translating & saving...' : 'Traduciendo y guardando...');
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/huddle_checkins`, {
+    await fetch(`${PROXY_URL}?action=insert`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
-        'Prefer': 'return=minimal'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(row)
     });
-  } catch(e) { console.error('Supabase error:', e); }
-
+  } catch(e) { console.error('Submit error:', e); }
   setLoading(false);
   const now = new Date();
   document.getElementById('success-title').textContent = lang==='en'?'Check-In Complete! 🌿':'¡Registro Completo! 🌿';
@@ -862,8 +872,10 @@ function renderBuckets(body) {
 }
 
 function makeTile(s, field) {
+  // Respect hub language toggle: EN shows translated, ES shows original
   const en   = (s[field+'_en']   || s[field+'_orig'] || '').trim();
   const orig = (s[field+'_orig'] || '').trim();
+  const displayText = (hubLang === 'es' && orig) ? orig : en;
   if (!en) return null;
   const time = new Date(s.submitted_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
   let flag = '';
@@ -875,7 +887,8 @@ function makeTile(s, field) {
     const cls = s.materials_urgency==='Need ASAP'||s.materials_urgency==='Urgente' ? 'flag-urgent' : s.materials_urgency.includes('Week')||s.materials_urgency.includes('Semana') ? 'flag-warn' : 'flag-ok';
     flag = `<div><span class="tile-flag ${cls}">${s.materials_urgency}</span></div>`;
   }
-  const showOrig = s.input_lang==='es' && orig && orig !== en;
+  // Show original Spanish below English tile only when viewing in English and input was Spanish
+  const showOrig = hubLang === 'en' && s.input_lang === 'es' && orig && orig !== en;
   const tileId = `tile-${s.id}-${field}`;
   return `<div class="tile" id="${tileId}">
     <div class="tile-top">
@@ -886,7 +899,7 @@ function makeTile(s, field) {
         <button class="tile-delete" onclick="deleteTile('${tileId}')" title="Remove tile">✕</button>
       </div>
     </div>
-    <div class="tile-text">${en}</div>
+    <div class="tile-text">${displayText}</div>
     ${flag}
     ${showOrig ? `<div class="tile-orig">🇲🇽 ${orig}</div>` : ''}
   </div>`;
@@ -959,6 +972,14 @@ function renderFiltered(body, field) {
     <div class="bucket-body sortable-bucket" id="bkt-flt">${tiles.join('')}</div>
   </div>`;
   Sortable.create(document.getElementById('bkt-flt'), { animation:150, ghostClass:'sortable-ghost', chosenClass:'sortable-chosen' });
+}
+
+// ── HUB LANGUAGE TOGGLE ──
+function setHubLang(l) {
+  hubLang = l;
+  document.querySelectorAll('.hub-lang-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('hlb-' + l).classList.add('active');
+  renderHub(currentView); // re-render tiles with new language
 }
 
 // ── UTILS ──
