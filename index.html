@@ -514,6 +514,7 @@ let submissions = [];
 let currentView = 'buckets';
 let hubLang = 'en'; // 'en' or 'es' — controls which column hub displays
 let trashItems = []; // shared trash — loaded from Supabase
+let deletedTiles = new Set(); // tracks 'checkinId|field' keys so deleted tiles don't repopulate
 
 // ── QUESTIONS ──
 const Q = {
@@ -898,6 +899,8 @@ function renderBuckets(body) {
 }
 
 function makeTile(s, field) {
+  // Skip tiles that have been moved to trash
+  if (deletedTiles.has(`${s.id}|${field}`)) return null;
   // Respect hub language toggle: EN shows translated, ES shows original
   const en   = (s[field+'_en']   || s[field+'_orig'] || '').trim();
   const orig = (s[field+'_orig'] || '').trim();
@@ -1012,6 +1015,8 @@ function setHubLang(l) {
 async function deleteTile(tileId, checkinId, field) {
   const el = document.getElementById(tileId);
   if (!el) return;
+  // Immediately mark as deleted so it won't repopulate on re-render
+  deletedTiles.add(`${checkinId}|${field}`);
   const submission = submissions.find(s => s.id === checkinId);
   if (!submission) { el.remove(); return; }
   const trashRecord = {
@@ -1045,6 +1050,8 @@ async function loadTrash() {
     trashItems = await resp.json();
     if (!Array.isArray(trashItems)) trashItems = [];
   } catch(e) { trashItems = []; }
+  // Rebuild deletedTiles set so tiles don't repopulate after render
+  deletedTiles = new Set(trashItems.map(t => `${t.checkin_id}|${t.field}`));
   updateTrashBadge();
 }
 
@@ -1063,10 +1070,13 @@ function updateTrashBadge() {
 
 async function restoreTile(trashId) {
   try {
+    const item = trashItems.find(t => t.id === trashId);
     await fetch(`${SUPABASE_URL}/rest/v1/huddle_trash?id=eq.${trashId}`, {
       method: 'DELETE',
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
     });
+    // Remove from deletedTiles so it reappears in buckets
+    if (item) deletedTiles.delete(`${item.checkin_id}|${item.field}`);
     trashItems = trashItems.filter(t => t.id !== trashId);
     updateTrashBadge();
     renderHub('trash');
@@ -1081,6 +1091,7 @@ async function emptyTrash() {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
     });
     trashItems = [];
+    deletedTiles.clear();
     updateTrashBadge();
     renderHub('trash');
   } catch(e) { console.error('Empty trash error:', e); }
