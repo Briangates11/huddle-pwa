@@ -274,6 +274,34 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); }
 .no-data .no-icon { font-size: 2.8rem; margin-bottom: 0.75rem; }
 .no-data p { font-size: 0.9rem; line-height: 1.5; }
 
+/* Trash styles */
+.trash-tile {
+  background: #fff; border: 1.5px dashed var(--border); border-radius: 10px;
+  padding: 0.75rem; margin-bottom: 0.55rem; opacity: 0.85;
+}
+.trash-tile-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 4px; }
+.trash-tile-meta { font-size: 0.7rem; color: var(--muted); }
+.trash-tile-field { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 3px; }
+.trash-tile-text { font-size: 0.87rem; color: var(--text); line-height: 1.45; }
+.restore-btn {
+  background: var(--green-light); border: 1.5px solid var(--green); color: var(--green);
+  border-radius: 8px; padding: 4px 10px; font-size: 0.72rem; font-weight: 700;
+  cursor: pointer; font-family: var(--font); white-space: nowrap; flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.restore-btn:active { background: var(--green); color: #fff; }
+.empty-trash-btn {
+  width: 100%; padding: 11px; background: var(--red-light); color: var(--red);
+  border: 1.5px solid var(--red); border-radius: 10px; font-family: var(--font-cond);
+  font-size: 1rem; font-weight: 700; cursor: pointer; margin-bottom: 1rem;
+  letter-spacing: 0.5px; -webkit-tap-highlight-color: transparent;
+}
+.empty-trash-btn:active { background: var(--red); color: #fff; }
+.trash-count-badge {
+  background: var(--red); color: #fff; border-radius: 10px;
+  padding: 1px 6px; font-size: 0.65rem; font-weight: 700; margin-left: 4px;
+}
+
 /* Hub language toggle */
 .hub-lang-toggle { display: flex; gap: 4px; margin-top: 4px; }
 .hub-lang-btn {
@@ -457,6 +485,7 @@ input, select, textarea { font-size: 16px !important; }
     <div class="hub-tab" data-view="materials" onclick="hubTab('materials',this)">🧰 Materials</div>
     <div class="hub-tab" data-view="labor" onclick="hubTab('labor',this)">👥 Labor</div>
     <div class="hub-tab" data-view="equipment" onclick="hubTab('equipment',this)">🚛 Equipment</div>
+    <div class="hub-tab" data-view="trash" onclick="hubTab('trash',this)" id="trash-tab">🗑 Trash</div>
   </div>
   <div class="hub-body" id="hub-body"></div>
 </div>
@@ -484,6 +513,7 @@ let currentRecognition = null;
 let submissions = [];
 let currentView = 'buckets';
 let hubLang = 'en'; // 'en' or 'es' — controls which column hub displays
+let trashItems = []; // shared trash — loaded from Supabase
 
 // ── QUESTIONS ──
 const Q = {
@@ -819,6 +849,7 @@ async function loadHub() {
     if (!Array.isArray(submissions)) submissions = [];
   } catch(e) { submissions = []; }
   document.getElementById('hub-sub-count').textContent = submissions.length + ' check-in' + (submissions.length!==1?'s':'');
+  await loadTrash();
   setLoading(false);
   renderHub(currentView);
 }
@@ -838,6 +869,7 @@ function renderHub(view) {
   }
   if (view === 'buckets') renderBuckets(body);
   else if (view === 'foremen') renderByForeman(body);
+  else if (view === 'trash') renderTrash(body);
   else renderFiltered(body, view);
 }
 
@@ -890,7 +922,7 @@ function makeTile(s, field) {
       <div class="tile-meta">
         <span class="tile-time">${time}</span>
         <span class="tile-branch">${s.branch}</span>
-        <button class="tile-delete" onclick="deleteTile('${tileId}')" title="Remove tile">✕</button>
+        <button class="tile-delete" onclick="deleteTile('${tileId}','${s.id}','${field}')" title="Move to trash">✕</button>
       </div>
     </div>
     <div class="tile-text">${displayText}</div>
@@ -976,19 +1008,118 @@ function setHubLang(l) {
   renderHub(currentView); // re-render tiles with new language
 }
 
-// ── UTILS ──
-function deleteTile(tileId) {
+// ── TRASH ──
+async function deleteTile(tileId, checkinId, field) {
   const el = document.getElementById(tileId);
-  if (el) {
-    el.style.transition = 'opacity 0.2s, max-height 0.3s';
-    el.style.opacity = '0';
-    el.style.maxHeight = '0';
-    el.style.overflow = 'hidden';
-    el.style.marginBottom = '0';
-    el.style.padding = '0';
-    setTimeout(() => el.remove(), 300);
+  if (!el) return;
+  const submission = submissions.find(s => s.id === checkinId);
+  if (!submission) { el.remove(); return; }
+  const trashRecord = {
+    checkin_id: checkinId, field: field,
+    deleted_by: document.getElementById('hub-role-label')?.textContent || 'Manager',
+    checkin_data: submission
+  };
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/huddle_trash`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(trashRecord)
+    });
+  } catch(e) { console.error('Trash save error:', e); }
+  el.style.transition = 'opacity 0.2s, max-height 0.3s, margin 0.3s, padding 0.3s';
+  el.style.opacity = '0'; el.style.maxHeight = '0'; el.style.overflow = 'hidden';
+  el.style.marginBottom = '0'; el.style.padding = '0';
+  setTimeout(() => { el.remove(); updateTrashBadge(); }, 300);
+}
+
+async function loadTrash() {
+  try {
+    const resp = await fetch(`${SUPABASE_URL}/rest/v1/huddle_trash?order=deleted_at.desc&limit=100`, {
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    trashItems = await resp.json();
+    if (!Array.isArray(trashItems)) trashItems = [];
+  } catch(e) { trashItems = []; }
+  updateTrashBadge();
+}
+
+function updateTrashBadge() {
+  const tab = document.getElementById('trash-tab');
+  if (!tab) return;
+  const existing = tab.querySelector('.trash-count-badge');
+  if (existing) existing.remove();
+  if (trashItems.length > 0) {
+    const badge = document.createElement('span');
+    badge.className = 'trash-count-badge';
+    badge.textContent = trashItems.length;
+    tab.appendChild(badge);
   }
 }
+
+async function restoreTile(trashId) {
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/huddle_trash?id=eq.${trashId}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    trashItems = trashItems.filter(t => t.id !== trashId);
+    updateTrashBadge();
+    renderHub('trash');
+  } catch(e) { console.error('Restore error:', e); }
+}
+
+async function emptyTrash() {
+  if (!confirm('Permanently delete all items in trash? This cannot be undone.')) return;
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/huddle_trash?deleted_at=gte.2000-01-01T00:00:00`, {
+      method: 'DELETE',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+    });
+    trashItems = [];
+    updateTrashBadge();
+    renderHub('trash');
+  } catch(e) { console.error('Empty trash error:', e); }
+}
+
+function renderTrash(body) {
+  const FIELD_LABELS = { today_work:"Today's Work", materials:'Materials', labor:'Labor & Crew', equipment:'Equipment', issues:'Issues', plan_finish:'Plan & Finish' };
+  const FIELD_COLORS = { today_work:'#2E7D32', materials:'#1565C0', labor:'#6A1B9A', equipment:'#E65100', issues:'#C62828', plan_finish:'#00695C' };
+  if (!trashItems.length) {
+    body.innerHTML = '<div class="no-data"><div class="no-icon">🗑</div><p>Trash is empty.</p></div>';
+    return;
+  }
+  let html = `<button class="empty-trash-btn" onclick="emptyTrash()">🗑 Empty Trash (${trashItems.length} item${trashItems.length!==1?'s':''})</button>`;
+  trashItems.forEach(t => {
+    const s = t.checkin_data;
+    const field = t.field;
+    const en = (s[field+'_en'] || s[field+'_orig'] || '').trim();
+    const orig = (s[field+'_orig'] || '').trim();
+    const displayText = hubLang === 'es' && orig ? orig : en;
+    if (!displayText) return;
+    const time = new Date(t.deleted_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+    const date = new Date(t.deleted_at).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const color = FIELD_COLORS[field] || '#666';
+    html += `<div class="trash-tile">
+      <div class="trash-tile-top">
+        <div>
+          <div class="trash-tile-field" style="color:${color}">${FIELD_LABELS[field]||field}</div>
+          <div style="font-size:0.7rem;font-weight:700;color:var(--text)">${s.foreman_name} · ${s.branch}</div>
+        </div>
+        <button class="restore-btn" onclick="restoreTile('${t.id}')">↩ Restore</button>
+      </div>
+      <div class="trash-tile-text">${displayText}</div>
+      <div class="trash-tile-meta">Deleted by ${t.deleted_by} · ${date} ${time}</div>
+    </div>`;
+  });
+  body.innerHTML = html;
+}
+
+// ── UTILS ──
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
