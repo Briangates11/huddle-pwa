@@ -38,7 +38,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); }
 .screen { display: none; height: 100vh; flex-direction: column; overflow: hidden; }
 .screen.active { display: flex; }
 
-/* ── LOGIN ── */
+/* ââ LOGIN ââ */
 #login {
   align-items: center; justify-content: center; padding: 1.5rem;
   background: linear-gradient(160deg, #1B5E20 0%, #2E7D32 60%, #388E3C 100%);
@@ -83,7 +83,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); }
 .hub-link { text-align: center; margin-top: 1rem; font-size: 0.85rem; color: var(--muted); }
 .hub-link a { color: var(--green); text-decoration: none; font-weight: 600; cursor: pointer; }
 
-/* ── CHECK-IN ── */
+/* ââ CHECK-IN ââ */
 #checkin { background: var(--bg); }
 .checkin-header {
   background: var(--green); color: #fff;
@@ -97,6 +97,8 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); }
   font-size: 0.8rem; font-weight: 600; cursor: pointer; border: 1px solid rgba(255,255,255,0.35);
   color: #fff; white-space: nowrap; flex-shrink: 0; margin-left: 8px;
 }
+.lang-pill.active { background: #fff; color: var(--green); font-weight: 700; }
+.form-lang-toggle { display: flex; gap: 6px; flex-shrink: 0; margin-left: 8px; }
 .progress-bar { height: 3px; background: rgba(255,255,255,0.25); flex-shrink: 0; }
 .progress-fill { height: 100%; background: #fff; transition: width 0.4s ease; }
 .checkin-body { flex: 1; overflow-y: auto; padding: 1rem; -webkit-overflow-scrolling: touch; }
@@ -147,7 +149,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); }
 .submit-btn:not(:disabled):active { background: var(--green-dark); transform: scale(0.99); }
 .submit-count { text-align: center; font-size: 0.75rem; color: var(--muted); margin-top: 6px; }
 
-/* ── SUCCESS ── */
+/* ââ SUCCESS ââ */
 #success {
   align-items: center; justify-content: center; padding: 2rem;
   background: linear-gradient(160deg, #1B5E20, #2E7D32);
@@ -161,7 +163,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); }
 .success-card p { color: var(--muted); font-size: 0.95rem; line-height: 1.55; }
 .success-time { display: inline-block; background: var(--green-light); color: var(--green); font-weight: 600; font-size: 0.82rem; padding: 4px 12px; border-radius: 20px; margin-top: 0.75rem; }
 
-/* ── HUB AUTH ── */
+/* ââ HUB AUTH ââ */
 #hubauth {
   align-items: center; justify-content: center; padding: 1.5rem;
   background: var(--gray);
@@ -173,7 +175,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); }
 .hubauth-card h2 { font-family: var(--font-cond); font-size: 1.6rem; font-weight: 700; margin-bottom: 0.4rem; }
 .hubauth-card p { color: var(--muted); font-size: 0.88rem; margin-bottom: 1.5rem; line-height: 1.45; }
 
-/* ── COMMAND HUB ── */
+/* ââ COMMAND HUB ââ */
 #hub { background: #EAECEE; }
 .hub-header {
   background: var(--gray); color: #fff; flex-shrink: 0;
@@ -373,17 +375,17 @@ input, select, textarea { font-size: 16px !important; }
 </head>
 <body>
 
-<!-- ═══ LOGIN ═══ -->
+<!-- âââ LOGIN âââ -->
 <div id="login" class="screen active">
   <div class="login-card">
     <div class="logo">
-      <div class="logo-badge"><span>🌿</span></div>
+      <div class="logo-badge"><span>ð¿</span></div>
       <div class="logo-main">K&D LANDSCAPING</div>
       <div class="logo-sub">Daily Huddle Check-In</div>
     </div>
     <div class="lang-toggle">
-      <button class="lang-btn active" onclick="setLang('en',this)">🇺🇸 English</button>
-      <button class="lang-btn" onclick="setLang('es',this)">🇲🇽 Español</button>
+      <button class="lang-btn active" id="land-en-btn" onclick="setLang('en')">🇺🇸 English</button>
+      <button class="lang-btn" id="land-es-btn" onclick="setLang('es')">🇲🇽 Español</button>
     </div>
     <div class="field-group">
       <label id="lbl-name">Your Name</label>
@@ -399,22 +401,22 @@ input, select, textarea { font-size: 16px !important; }
       </select>
     </div>
     <button class="btn-primary" onclick="startCheckin()">
-      <span id="login-btn-text">Start Check-In ➜</span>
+      <span id="login-btn-text">Start Check-In â</span>
     </button>
     <div class="hub-link">
-      <a onclick="showHubAuth()">Management Hub →</a>
+      <a onclick="showHubAuth()">Management Hub â</a>
     </div>
   </div>
 </div>
 
-<!-- ═══ CHECK-IN ═══ -->
+<!-- âââ CHECK-IN âââ -->
 <div id="checkin" class="screen">
   <div class="checkin-header">
     <div>
       <h2 id="ci-greeting">Morning, Foreman</h2>
       <p id="ci-date"></p>
     </div>
-    <button class="lang-pill" onclick="toggleCheckinLang()" id="lang-pill-btn">🇲🇽 Español</button>
+    <div class="form-lang-toggle"><button id="form-en-btn" class="lang-pill" onclick="setLang('en')">🇺🇸 EN</button><button id="form-es-btn" class="lang-pill" onclick="setLang('es')">🇲🇽 ES</button></div>
   </div>
   <div class="progress-bar"><div class="progress-fill" id="progress" style="width:0%"></div></div>
   <div class="checkin-body" id="questions-body"></div>
@@ -426,10 +428,10 @@ input, select, textarea { font-size: 16px !important; }
   </div>
 </div>
 
-<!-- ═══ SUCCESS ═══ -->
+<!-- âââ SUCCESS âââ -->
 <div id="success" class="screen">
   <div class="success-card">
-    <div class="success-icon">✅</div>
+    <div class="success-icon">â</div>
     <h2 id="success-title">Check-In Complete!</h2>
     <p id="success-msg">Your responses have been sent to the management hub. Have a great shift!</p>
     <div class="success-time" id="success-time"></div>
@@ -437,10 +439,10 @@ input, select, textarea { font-size: 16px !important; }
   </div>
 </div>
 
-<!-- ═══ HUB AUTH ═══ -->
+<!-- âââ HUB AUTH âââ -->
 <div id="hubauth" class="screen">
   <div class="hubauth-card">
-    <h2>🏗 Management Hub</h2>
+    <h2>ð Management Hub</h2>
     <p>Access the daily command center to review foreman check-ins and manage your crew.</p>
     <div class="field-group">
       <label>Your Role</label>
@@ -456,12 +458,12 @@ input, select, textarea { font-size: 16px !important; }
       <input type="password" id="hub-pin" placeholder="Enter PIN" maxlength="6"
              onkeydown="if(event.key==='Enter')authHub()">
     </div>
-    <button class="btn-primary" onclick="authHub()">Access Hub ➜</button>
-    <div class="hub-link" style="margin-top:0.85rem"><a onclick="goLogin()">← Back to Check-In</a></div>
+    <button class="btn-primary" onclick="authHub()">Access Hub â</button>
+    <div class="hub-link" style="margin-top:0.85rem"><a onclick="goLogin()">â Back to Check-In</a></div>
   </div>
 </div>
 
-<!-- ═══ COMMAND HUB ═══ -->
+<!-- âââ COMMAND HUB âââ -->
 <div id="hub" class="screen">
   <div class="hub-header">
     <div class="hub-header-left">
@@ -472,20 +474,20 @@ input, select, textarea { font-size: 16px !important; }
       <div class="hub-date" id="hub-date-label"></div>
       <div class="hub-count" id="hub-sub-count">0 check-ins</div>
       <div class="hub-lang-toggle">
-        <button class="hub-lang-btn active" id="hlb-en" onclick="setHubLang('en')">🇺🇸 EN</button>
-        <button class="hub-lang-btn" id="hlb-es" onclick="setHubLang('es')">🇲🇽 ES</button>
+        <button class="hub-lang-btn active" id="hlb-en" onclick="setHubLang('en')">ðºð¸ EN</button>
+        <button class="hub-lang-btn" id="hlb-es" onclick="setHubLang('es')">ð²ð½ ES</button>
       </div>
-      <button class="back-btn" onclick="goLogin()">← Back</button>
+      <button class="back-btn" onclick="goLogin()">â Back</button>
     </div>
   </div>
   <div class="hub-tabs" id="hub-tabs">
-    <div class="hub-tab active" data-view="buckets" onclick="hubTab('buckets',this)">📋 All Buckets</div>
-    <div class="hub-tab" data-view="foremen" onclick="hubTab('foremen',this)">👷 By Foreman</div>
-    <div class="hub-tab" data-view="issues" onclick="hubTab('issues',this)">🚩 Issues</div>
-    <div class="hub-tab" data-view="materials" onclick="hubTab('materials',this)">🧰 Materials</div>
-    <div class="hub-tab" data-view="labor" onclick="hubTab('labor',this)">👥 Labor</div>
-    <div class="hub-tab" data-view="equipment" onclick="hubTab('equipment',this)">🚛 Equipment</div>
-    <div class="hub-tab" data-view="trash" onclick="hubTab('trash',this)" id="trash-tab">🗑 Trash</div>
+    <div class="hub-tab active" data-view="buckets" onclick="hubTab('buckets',this)">ð All Buckets</div>
+    <div class="hub-tab" data-view="foremen" onclick="hubTab('foremen',this)">ð· By Foreman</div>
+    <div class="hub-tab" data-view="issues" onclick="hubTab('issues',this)">ð© Issues</div>
+    <div class="hub-tab" data-view="materials" onclick="hubTab('materials',this)">ð§° Materials</div>
+    <div class="hub-tab" data-view="labor" onclick="hubTab('labor',this)">ð¥ Labor</div>
+    <div class="hub-tab" data-view="equipment" onclick="hubTab('equipment',this)">ð Equipment</div>
+    <div class="hub-tab" data-view="trash" onclick="hubTab('trash',this)" id="trash-tab">ð Trash</div>
   </div>
   <div class="hub-body" id="hub-body"></div>
 </div>
@@ -497,13 +499,13 @@ input, select, textarea { font-size: 16px !important; }
 </div>
 
 <script>
-// ── CONFIG ──
+// ââ CONFIG ââ
 const SUPABASE_URL = 'https://rlhfofdsdpsiavikuxhd.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsaGZvZmRzZHBzaWF2aWt1eGhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk0NzgxOTcsImV4cCI6MjA5NTA1NDE5N30.yq77u8dHlTEqhbt3RI2QkRtGHoSlfP1DB1V0vfsMXIE';
 const PROXY_URL = 'https://rlhfofdsdpsiavikuxhd.supabase.co/functions/v1/huddle-proxy';
 const HUB_PIN = '1986';
 
-// ── STATE ──
+// ââ STATE ââ
 let lang = 'en';
 let foremanName = '';
 let foremanBranch = '';
@@ -512,27 +514,27 @@ let urgencyAnswers = {};
 let currentRecognition = null;
 let submissions = [];
 let currentView = 'buckets';
-let hubLang = 'en'; // 'en' or 'es' — controls which column hub displays
-let trashItems = []; // shared trash — loaded from Supabase
+let hubLang = 'en'; // 'en' or 'es' â controls which column hub displays
+let trashItems = []; // shared trash â loaded from Supabase
 let deletedTiles = new Set(); // tracks 'checkinId|field' keys so deleted tiles don't repopulate
 
-// ── QUESTIONS ──
+// ââ QUESTIONS ââ
 const Q = {
   en: [
-    { id:'today_work', label:'Q1 — Today\'s Work', text:'What are you doing today?', sub:'Describe the scope of work for your crew today.', urgencyKey:null },
-    { id:'materials',  label:'Q2 — Materials',     text:'Do you need any materials for the week?', sub:'List materials needed. Include quantities if known.', urgencyKey:'materials_urgency' },
-    { id:'labor',      label:'Q3 — Labor',          text:'Do you need more or fewer guys this week?', sub:'More crew, fewer crew, or just right?', urgencyKey:'labor_need' },
-    { id:'equipment',  label:'Q4 — Equipment',      text:'Do you need equipment, or are you done with what you have?', sub:'List needs or call out items ready to return.', urgencyKey:'equipment_status' },
-    { id:'issues',     label:'Q5 — Issues',          text:'Are there any issues needing to be discussed?', sub:'Safety, client, quality, or anything else on your mind.', urgencyKey:'issue_urgency' },
-    { id:'plan_finish',label:'Q6 — Plan & Finish',  text:'What are you working on today and when do you plan to finish?', sub:'e.g. "Irrigation on Zone 3 — done by 3pm"', urgencyKey:null }
+    { id:'today_work', label:'Q1 â Today\'s Work', text:'What are you doing today?', sub:'Describe the scope of work for your crew today.', urgencyKey:null },
+    { id:'materials',  label:'Q2 â Materials',     text:'Do you need any materials for the week?', sub:'List materials needed. Include quantities if known.', urgencyKey:'materials_urgency' },
+    { id:'labor',      label:'Q3 â Labor',          text:'Do you need more or fewer guys this week?', sub:'More crew, fewer crew, or just right?', urgencyKey:'labor_need' },
+    { id:'equipment',  label:'Q4 â Equipment',      text:'Do you need equipment, or are you done with what you have?', sub:'List needs or call out items ready to return.', urgencyKey:'equipment_status' },
+    { id:'issues',     label:'Q5 â Issues',          text:'Are there any issues needing to be discussed?', sub:'Safety, client, quality, or anything else on your mind.', urgencyKey:'issue_urgency' },
+    { id:'plan_finish',label:'Q6 â Plan & Finish',  text:'What are you working on today and when do you plan to finish?', sub:'e.g. "Irrigation on Zone 3 â done by 3pm"', urgencyKey:null }
   ],
   es: [
-    { id:'today_work', label:'P1 — Trabajo de Hoy', text:'¿Qué vas a hacer hoy?', sub:'Describe el trabajo de tu cuadrilla hoy.', urgencyKey:null },
-    { id:'materials',  label:'P2 — Materiales',     text:'¿Necesitas materiales para esta semana?', sub:'Lista los materiales. Incluye cantidades si las sabes.', urgencyKey:'materials_urgency' },
-    { id:'labor',      label:'P3 — Personal',        text:'¿Necesitas más o menos hombres esta semana?', sub:'¿Más cuadrilla, menos, o está bien así?', urgencyKey:'labor_need' },
-    { id:'equipment',  label:'P4 — Equipo',          text:'¿Necesitas equipo o ya terminaste con lo que tienes?', sub:'Lista lo que necesitas o lo que está listo para devolver.', urgencyKey:'equipment_status' },
-    { id:'issues',     label:'P5 — Problemas',       text:'¿Hay algún problema que necesita discutirse?', sub:'Seguridad, cliente, calidad o cualquier otra cosa.', urgencyKey:'issue_urgency' },
-    { id:'plan_finish',label:'P6 — Plan y Término', text:'¿Qué planeas trabajar hoy y cuándo planeas terminar?', sub:'Ej: "Riego en Zona 3 — termino a las 3pm"', urgencyKey:null }
+    { id:'today_work', label:'P1 â Trabajo de Hoy', text:'Â¿QuÃ© vas a hacer hoy?', sub:'Describe el trabajo de tu cuadrilla hoy.', urgencyKey:null },
+    { id:'materials',  label:'P2 â Materiales',     text:'Â¿Necesitas materiales para esta semana?', sub:'Lista los materiales. Incluye cantidades si las sabes.', urgencyKey:'materials_urgency' },
+    { id:'labor',      label:'P3 â Personal',        text:'Â¿Necesitas mÃ¡s o menos hombres esta semana?', sub:'Â¿MÃ¡s cuadrilla, menos, o estÃ¡ bien asÃ­?', urgencyKey:'labor_need' },
+    { id:'equipment',  label:'P4 â Equipo',          text:'Â¿Necesitas equipo o ya terminaste con lo que tienes?', sub:'Lista lo que necesitas o lo que estÃ¡ listo para devolver.', urgencyKey:'equipment_status' },
+    { id:'issues',     label:'P5 â Problemas',       text:'Â¿Hay algÃºn problema que necesita discutirse?', sub:'Seguridad, cliente, calidad o cualquier otra cosa.', urgencyKey:'issue_urgency' },
+    { id:'plan_finish',label:'P6 â Plan y TÃ©rmino', text:'Â¿QuÃ© planeas trabajar hoy y cuÃ¡ndo planeas terminar?', sub:'Ej: "Riego en Zona 3 â termino a las 3pm"', urgencyKey:null }
   ]
 };
 
@@ -545,9 +547,9 @@ const URGENCY = {
   },
   es: {
     materials_urgency: [{l:'Urgente',c:'urgent'},{l:'Esta Semana',c:'warn'},{l:'Puede Esperar',c:'ok'}],
-    labor_need:        [{l:'Necesito Más',c:'ok'},{l:'Está Bien',c:'ok'},{l:'Hay De Más',c:'warn'}],
+    labor_need:        [{l:'Necesito MÃ¡s',c:'ok'},{l:'EstÃ¡ Bien',c:'ok'},{l:'Hay De MÃ¡s',c:'warn'}],
     equipment_status:  [{l:'Necesito Equipo',c:'warn'},{l:'Listo p/ Devolver',c:'ok'},{l:'Todo Bien',c:'ok'}],
-    issue_urgency:     [{l:'Crítico',c:'urgent'},{l:'Hay que Discutir',c:'warn'},{l:'Solo FYI',c:'ok'}]
+    issue_urgency:     [{l:'CrÃ­tico',c:'urgent'},{l:'Hay que Discutir',c:'warn'},{l:'Solo FYI',c:'ok'}]
   }
 };
 
@@ -560,42 +562,46 @@ const BUCKETS = [
   { id:'plan_finish', label:'Plan & Finish',color:'#00695C' }
 ];
 
-// ── LANG ──
-function setLang(l, btn) {
+// ââ LANG ââ
+function setLang(l) {
   lang = l;
-  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  const isES = l === 'es';
+  var landEn = document.getElementById('land-en-btn');
+  var landEs = document.getElementById('land-es-btn');
+  if (landEn) landEn.classList.toggle('active', lang === 'en');
+  if (landEs) landEs.classList.toggle('active', lang === 'es');
+  var formEn = document.getElementById('form-en-btn');
+  var formEs = document.getElementById('form-es-btn');
+  if (formEn) formEn.classList.toggle('active', lang === 'en');
+  if (formEs) formEs.classList.toggle('active', lang === 'es');
+  const isES = lang === 'es';
   document.getElementById('lbl-name').textContent   = isES ? 'Tu Nombre' : 'Your Name';
   document.getElementById('lbl-branch').textContent = isES ? 'Sucursal'  : 'Branch';
-  document.getElementById('login-btn-text').textContent = isES ? 'Iniciar Registro ➜' : 'Start Check-In ➜';
-}
-
-function toggleCheckinLang() {
-  lang = lang === 'en' ? 'es' : 'en';
-  document.getElementById('lang-pill-btn').textContent = lang === 'en' ? '🇲🇽 Español' : '🇺🇸 English';
+  document.getElementById('login-btn-text').textContent = isES ? 'Iniciar Registro ❖' : 'Start Check-In ❖';
   renderQuestions();
 }
-
-// ── LOGIN ──
+// ââ LOGIN ââ
 function startCheckin() {
   foremanName   = document.getElementById('foreman-name').value.trim();
   foremanBranch = document.getElementById('foreman-branch').value;
   if (!foremanName)   { alert(lang==='en'?'Please enter your name.':'Por favor ingresa tu nombre.'); return; }
   if (!foremanBranch) { alert(lang==='en'?'Please select your branch.':'Por favor selecciona tu sucursal.'); return; }
   const now = new Date();
-  document.getElementById('ci-greeting').textContent = (lang==='en'?'Morning, ':'Buenos Días, ') + foremanName.split(' ')[0];
+  document.getElementById('ci-greeting').textContent = (lang==='en'?'Morning, ':'Buenos DÃ­as, ') + foremanName.split(' ')[0];
   document.getElementById('ci-date').textContent = now.toLocaleDateString(lang==='en'?'en-US':'es-MX', { weekday:'long', month:'long', day:'numeric' });
-  document.getElementById('lang-pill-btn').textContent = lang==='en'?'🇲🇽 Español':'🇺🇸 English';
+  document.getElementById('lang-pill-btn').textContent = lang==='en'?'ð²ð½ EspaÃ±ol':'ðºð¸ English';
   answers = {}; urgencyAnswers = {};
   showScreen('checkin');
   renderQuestions();
 }
 
-// ── QUESTIONS ──
+// ââ QUESTIONS ââ
 function renderQuestions() {
   const qs = Q[lang];
   const urgMap = URGENCY[lang];
+  const existing = {};
+  document.querySelectorAll('#questions-body textarea').forEach(ta => {
+    if (ta.id) existing[ta.id] = ta.value;
+  });
   let html = '';
   qs.forEach(q => {
     const val = answers[q.id] || '';
@@ -613,7 +619,7 @@ function renderQuestions() {
       <div class="mic-row">
         <button class="mic-btn" id="mic-${q.id}" onclick="toggleVoice('${q.id}')">
           <span class="mic-dot"></span>
-          🎙 ${lang==='en'?'Speak':'Hablar'}
+          ð ${lang==='en'?'Speak':'Hablar'}
         </button>
         <span class="char-count" id="cc-${q.id}">${val.length > 0 ? val.length + ' chars' : ''}</span>
       </div>
@@ -621,6 +627,9 @@ function renderQuestions() {
     </div>`;
   });
   document.getElementById('questions-body').innerHTML = html;
+  document.querySelectorAll('#questions-body textarea').forEach(ta => {
+    if (ta.id && existing[ta.id] !== undefined) ta.value = existing[ta.id];
+  });
   updateProgress();
 }
 
@@ -648,12 +657,12 @@ function updateProgress() {
   const cnt = document.getElementById('submit-count');
   btn.disabled = filled < 3;
   lbl.textContent = filled < 3
-    ? (lang==='en' ? `Complete ${3-filled} more field${3-filled!==1?'s':''}` : `Completa ${3-filled} campo${3-filled!==1?'s':''} más`)
-    : (lang==='en' ? 'Submit Check-In ✓' : 'Enviar Registro ✓');
+    ? (lang==='en' ? `Complete ${3-filled} more field${3-filled!==1?'s':''}` : `Completa ${3-filled} campo${3-filled!==1?'s':''} mÃ¡s`)
+    : (lang==='en' ? 'Submit Check-In â' : 'Enviar Registro â');
   cnt.textContent = `${filled} of 6 fields completed`;
 }
 
-// ── VOICE ──
+// ââ VOICE ââ
 function toggleVoice(qid) {
   const hasSR = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
   if (!hasSR) {
@@ -665,7 +674,7 @@ function toggleVoice(qid) {
 
   const btn = document.getElementById('mic-' + qid);
 
-  // If already recording this field — stop it
+  // If already recording this field â stop it
   if (currentRecognition) {
     currentRecognition.stop();
     currentRecognition = null;
@@ -701,7 +710,7 @@ function toggleVoice(qid) {
       }
     }
     // Show interim text as live preview
-    if (interimSpan) interimSpan.textContent = interim ? '🎙 ' + interim : '';
+    if (interimSpan) interimSpan.textContent = interim ? 'ð ' + interim : '';
 
     // Update textarea with final words so far
     const ta = document.getElementById('ans-' + qid);
@@ -726,7 +735,7 @@ function toggleVoice(qid) {
     if (interimSpan) interimSpan.remove();
     if (btn) {
       btn.classList.remove('recording');
-      btn.innerHTML = '<span class="mic-dot"></span>🎙 ' + (lang==='en'?'Speak':'Hablar');
+      btn.innerHTML = '<span class="mic-dot"></span>ð ' + (lang==='en'?'Speak':'Hablar');
     }
     currentRecognition = null;
   };
@@ -738,15 +747,15 @@ function toggleVoice(qid) {
 
     const msgs = {
       'not-allowed': lang==='en'
-        ? '⚠️ Microphone access denied. Please allow microphone in your browser settings.'
-        : '⚠️ Acceso al micrófono denegado. Permite el micrófono en la configuración del navegador.',
-      'no-speech': null, // silent — user just didn't speak
+        ? 'â ï¸ Microphone access denied. Please allow microphone in your browser settings.'
+        : 'â ï¸ Acceso al micrÃ³fono denegado. Permite el micrÃ³fono en la configuraciÃ³n del navegador.',
+      'no-speech': null, // silent â user just didn't speak
       'network': lang==='en'
-        ? '⚠️ Network error. Check your connection and try again.'
-        : '⚠️ Error de red. Verifica tu conexión e intenta de nuevo.',
+        ? 'â ï¸ Network error. Check your connection and try again.'
+        : 'â ï¸ Error de red. Verifica tu conexiÃ³n e intenta de nuevo.',
       'audio-capture': lang==='en'
-        ? '⚠️ No microphone found on this device.'
-        : '⚠️ No se encontró micrófono en este dispositivo.',
+        ? 'â ï¸ No microphone found on this device.'
+        : 'â ï¸ No se encontrÃ³ micrÃ³fono en este dispositivo.',
     };
     const msg = msgs[e.error];
     if (msg) alert(msg);
@@ -756,22 +765,22 @@ function toggleVoice(qid) {
     r.start();
     currentRecognition = r;
     btn.classList.add('recording');
-    btn.innerHTML = '<span class="mic-dot" style="display:block"></span>🔴 ' + (lang==='en'?'Tap to Stop':'Toca para Parar');
+    btn.innerHTML = '<span class="mic-dot" style="display:block"></span>ð´ ' + (lang==='en'?'Tap to Stop':'Toca para Parar');
   } catch(err) {
     alert(lang==='en'
       ? 'Could not start microphone: ' + err.message
-      : 'No se pudo iniciar el micrófono: ' + err.message);
+      : 'No se pudo iniciar el micrÃ³fono: ' + err.message);
   }
 }
 
 
-// ── SUBMIT ──
+// ââ SUBMIT ââ
 async function submitCheckin() {
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
   setLoading(true, lang==='en' ? 'Sending check-in...' : 'Enviando registro...');
 
-  // Build row with only _orig fields — edge function handles all translation
+  // Build row with only _orig fields â edge function handles all translation
   const row = {
     foreman_name: foremanName, branch: foremanBranch,
     submitted_at: new Date().toISOString(), input_lang: lang,
@@ -818,14 +827,14 @@ async function submitCheckin() {
 
   setLoading(false);
   const now = new Date();
-  document.getElementById('success-title').textContent = lang==='en'?'Check-In Complete! 🌿':'¡Registro Completo! 🌿';
-  document.getElementById('success-msg').textContent   = lang==='en'?'Your responses have been sent to the management hub. Have a great shift!':'Tus respuestas fueron enviadas al equipo de management. ¡Que tengas un buen turno!';
+  document.getElementById('success-title').textContent = lang==='en'?'Check-In Complete! ð¿':'Â¡Registro Completo! ð¿';
+  document.getElementById('success-msg').textContent   = lang==='en'?'Your responses have been sent to the management hub. Have a great shift!':'Tus respuestas fueron enviadas al equipo de management. Â¡Que tengas un buen turno!';
   document.getElementById('success-time').textContent  = now.toLocaleTimeString(lang==='en'?'en-US':'es-MX',{hour:'numeric',minute:'2-digit'});
   document.getElementById('success-btn').textContent   = lang==='en'?'New Check-In':'Nuevo Registro';
   showScreen('success');
 }
 
-// ── HUB AUTH ──
+// ââ HUB AUTH ââ
 function showHubAuth() { showScreen('hubauth'); }
 
 function authHub() {
@@ -838,7 +847,7 @@ function authHub() {
   loadHub();
 }
 
-// ── HUB DATA ──
+// ââ HUB DATA ââ
 async function loadHub() {
   setLoading(true, 'Loading today\'s check-ins...');
   try {
@@ -865,7 +874,7 @@ function hubTab(view, el) {
 function renderHub(view) {
   const body = document.getElementById('hub-body');
   if (!submissions.length) {
-    body.innerHTML = `<div class="no-data"><div class="no-icon">📋</div><p>No check-ins submitted today yet.<br>Check back after morning huddle.</p></div>`;
+    body.innerHTML = `<div class="no-data"><div class="no-icon">ð</div><p>No check-ins submitted today yet.<br>Check back after morning huddle.</p></div>`;
     return;
   }
   if (view === 'buckets') renderBuckets(body);
@@ -874,7 +883,7 @@ function renderHub(view) {
   else renderFiltered(body, view);
 }
 
-// ── BUCKET VIEW ──
+// ââ BUCKET VIEW ââ
 function renderBuckets(body) {
   let html = '<div class="bucket-grid">';
   BUCKETS.forEach(bc => {
@@ -909,7 +918,7 @@ function makeTile(s, field) {
   const time = new Date(s.submitted_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
   let flag = '';
   if (field==='issues' && s.issue_urgency) {
-    const cls = s.issue_urgency==='Critical'||s.issue_urgency==='Crítico' ? 'flag-urgent' : s.issue_urgency.includes('Discuss')||s.issue_urgency.includes('Discutir') ? 'flag-warn' : 'flag-ok';
+    const cls = s.issue_urgency==='Critical'||s.issue_urgency==='CrÃ­tico' ? 'flag-urgent' : s.issue_urgency.includes('Discuss')||s.issue_urgency.includes('Discutir') ? 'flag-warn' : 'flag-ok';
     flag = `<div><span class="tile-flag ${cls}">${s.issue_urgency}</span></div>`;
   }
   if (field==='materials' && s.materials_urgency) {
@@ -925,16 +934,16 @@ function makeTile(s, field) {
       <div class="tile-meta">
         <span class="tile-time">${time}</span>
         <span class="tile-branch">${s.branch}</span>
-        <button class="tile-delete" onclick="deleteTile('${tileId}','${s.id}','${field}')" title="Move to trash">✕</button>
+        <button class="tile-delete" onclick="deleteTile('${tileId}','${s.id}','${field}')" title="Move to trash">â</button>
       </div>
     </div>
     <div class="tile-text">${displayText}</div>
     ${flag}
-    ${showOrig ? `<div class="tile-orig">🇲🇽 ${orig}</div>` : ''}
+    ${showOrig ? `<div class="tile-orig">ð²ð½ ${orig}</div>` : ''}
   </div>`;
 }
 
-// ── BY FOREMAN VIEW ──
+// ââ BY FOREMAN VIEW ââ
 function renderByForeman(body) {
   const fields = ['today_work','materials','labor','equipment','issues','plan_finish'];
   const labels = ["Today's Work","Materials","Labor","Equipment","Issues","Plan & Finish"];
@@ -956,7 +965,7 @@ function renderByForeman(body) {
       return `<div class="expand-field">
         <div class="expand-label" style="color:${colors[j]}">${labels[j]}</div>
         <div class="expand-val">${en || orig}</div>
-        ${s.input_lang==='es' && orig && orig!==en ? `<div class="expand-orig">🇲🇽 ${orig}</div>` : ''}
+        ${s.input_lang==='es' && orig && orig!==en ? `<div class="expand-orig">ð²ð½ ${orig}</div>` : ''}
       </div>`;
     }).join('');
     const time = new Date(s.submitted_at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
@@ -964,11 +973,11 @@ function renderByForeman(body) {
       <div class="foreman-card-header">
         <div>
           <span class="foreman-card-name">${s.foreman_name}</span>
-          <span class="foreman-card-branch"> · ${s.branch} · ${time}</span>
+          <span class="foreman-card-branch"> Â· ${s.branch} Â· ${time}</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <span class="status-badge ${complete?'badge-done':'badge-partial'}">${complete?'Complete':'Partial'}</span>
-          <button class="toggle-btn" onclick="toggleExpand('${expandId}',this)">Details ▾</button>
+          <button class="toggle-btn" onclick="toggleExpand('${expandId}',this)">Details â¾</button>
         </div>
       </div>
       <div class="bucket-pills">${pillsHtml}</div>
@@ -981,15 +990,15 @@ function renderByForeman(body) {
 function toggleExpand(id, btn) {
   const el = document.getElementById(id);
   el.classList.toggle('open');
-  btn.textContent = el.classList.contains('open') ? 'Hide ▴' : 'Details ▾';
+  btn.textContent = el.classList.contains('open') ? 'Hide â´' : 'Details â¾';
 }
 
-// ── FILTERED VIEW ──
+// ââ FILTERED VIEW ââ
 function renderFiltered(body, field) {
   const bc = BUCKETS.find(b => b.id === field);
   const tiles = submissions.map(s => makeTile(s, field)).filter(Boolean);
   if (!tiles.length) {
-    body.innerHTML = `<div class="no-data"><div class="no-icon">✅</div><p>No ${bc.label} entries today.</p></div>`;
+    body.innerHTML = `<div class="no-data"><div class="no-icon">â</div><p>No ${bc.label} entries today.</p></div>`;
     return;
   }
   body.innerHTML = `<div class="bucket" style="max-width:560px">
@@ -1003,7 +1012,7 @@ function renderFiltered(body, field) {
   Sortable.create(document.getElementById('bkt-flt'), { animation:150, ghostClass:'sortable-ghost', chosenClass:'sortable-chosen' });
 }
 
-// ── HUB LANGUAGE TOGGLE ──
+// ââ HUB LANGUAGE TOGGLE ââ
 function setHubLang(l) {
   hubLang = l;
   document.querySelectorAll('.hub-lang-btn').forEach(b => b.classList.remove('active'));
@@ -1011,7 +1020,7 @@ function setHubLang(l) {
   renderHub(currentView); // re-render tiles with new language
 }
 
-// ── TRASH ──
+// ââ TRASH ââ
 async function deleteTile(tileId, checkinId, field) {
   const el = document.getElementById(tileId);
   if (!el) return;
@@ -1101,10 +1110,10 @@ function renderTrash(body) {
   const FIELD_LABELS = { today_work:"Today's Work", materials:'Materials', labor:'Labor & Crew', equipment:'Equipment', issues:'Issues', plan_finish:'Plan & Finish' };
   const FIELD_COLORS = { today_work:'#2E7D32', materials:'#1565C0', labor:'#6A1B9A', equipment:'#E65100', issues:'#C62828', plan_finish:'#00695C' };
   if (!trashItems.length) {
-    body.innerHTML = '<div class="no-data"><div class="no-icon">🗑</div><p>Trash is empty.</p></div>';
+    body.innerHTML = '<div class="no-data"><div class="no-icon">ð</div><p>Trash is empty.</p></div>';
     return;
   }
-  let html = `<button class="empty-trash-btn" onclick="emptyTrash()">🗑 Empty Trash (${trashItems.length} item${trashItems.length!==1?'s':''})</button>`;
+  let html = `<button class="empty-trash-btn" onclick="emptyTrash()">ð Empty Trash (${trashItems.length} item${trashItems.length!==1?'s':''})</button>`;
   trashItems.forEach(t => {
     const s = t.checkin_data;
     const field = t.field;
@@ -1119,18 +1128,18 @@ function renderTrash(body) {
       <div class="trash-tile-top">
         <div>
           <div class="trash-tile-field" style="color:${color}">${FIELD_LABELS[field]||field}</div>
-          <div style="font-size:0.7rem;font-weight:700;color:var(--text)">${s.foreman_name} · ${s.branch}</div>
+          <div style="font-size:0.7rem;font-weight:700;color:var(--text)">${s.foreman_name} Â· ${s.branch}</div>
         </div>
-        <button class="restore-btn" onclick="restoreTile('${t.id}')">↩ Restore</button>
+        <button class="restore-btn" onclick="restoreTile('${t.id}')">â© Restore</button>
       </div>
       <div class="trash-tile-text">${displayText}</div>
-      <div class="trash-tile-meta">Deleted by ${t.deleted_by} · ${date} ${time}</div>
+      <div class="trash-tile-meta">Deleted by ${t.deleted_by} Â· ${date} ${time}</div>
     </div>`;
   });
   body.innerHTML = html;
 }
 
-// ── UTILS ──
+// ââ UTILS ââ
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -1148,7 +1157,7 @@ function goLogin() {
   showScreen('login');
 }
 
-// ── PWA SERVICE WORKER ──
+// ââ PWA SERVICE WORKER ââ
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js').catch(e => console.log('SW:', e));
 }
